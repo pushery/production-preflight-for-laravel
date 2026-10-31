@@ -24,6 +24,9 @@ use Pushery\ProductionPreflight\Scope;
  * - a Mollie key, `test_` followed by at least 30 letters and digits
  * - a setting named `sandbox` that is switched on
  * - a setting named `mode` or `environment` whose value is `sandbox`
+ *
+ * On staging the check passes: a staging server takes its payments with test keys, and a live key
+ * there would move real money with every test purchase.
  */
 final class TestModeKeysCheck extends ProductionCheck
 {
@@ -37,6 +40,12 @@ final class TestModeKeysCheck extends ProductionCheck
     public function scope(): Scope
     {
         return Scope::Configuration;
+    }
+
+    #[Override]
+    protected function onStaging(): Inspection
+    {
+        return Inspection::pass($this->message('test-mode-keys.staging'));
     }
 
     #[Override]

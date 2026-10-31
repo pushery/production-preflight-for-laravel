@@ -51,6 +51,7 @@ return [
     'env-example-keys' => [
         'label' => 'Sleutels van het voorbeeldbestand',
         'pass' => 'De .env en het voorbeeldbestand noemen dezelfde sleutels.',
+        'pass_optional' => 'De .env noemt elke sleutel van het voorbeeldbestand, behalve :optional, die de applicatie als optioneel opgeeft.',
         'fail' => 'Sleutels van het voorbeeldbestand die in .env ontbreken: :missing. Elke geeft null, en de bijbehorende functie doet zonder een woord niets. Sleutels van .env die in het voorbeeldbestand ontbreken: :undocumented.',
         'warn' => 'Sleutels van .env die in het voorbeeldbestand ontbreken: :undocumented. De volgende installatie ontstaat uit het voorbeeld en zal ze missen.',
         'missing' => 'genoemd in het voorbeeldbestand, ontbreekt in .env',
@@ -87,6 +88,15 @@ return [
         'whitespace' => 'de waarde eindigt op witruimte, die een tool behoudt die de regel letterlijk neemt, zoals --env-file van Docker',
     ],
 
+    'development-stage-server' => [
+        'label' => 'Ontwikkelomgeving op een server',
+        'pass' => 'De applicatie wordt geserveerd op :host, een machine voor ontwikkeling.',
+        'not_development' => 'Niets te controleren: alleen een ontwikkelomgeving wordt tegen haar host gelezen, en de applicatie geeft de omgeving :stage op.',
+        'no_host' => 'app.url noemt geen host, dus valt niet te beoordelen of een server een ontwikkelomgeving opgeeft.',
+        'fail' => 'APP_ENV is :env en app.url noemt :host: een server die een ontwikkelomgeving opgeeft, waarop elke productiecontrole slaagt.',
+        'finding' => ':host is geen host waaronder een machine voor ontwikkeling wordt geserveerd, dus APP_ENV draagt waarschijnlijk nog de waarde uit .env.example',
+    ],
+
     'app-debug' => [
         'label' => 'Debugmodus',
         'pass' => 'De debugmodus staat uit.',
@@ -119,15 +129,17 @@ return [
         'label' => 'Een tweede weg voor meldingen',
         'pass' => 'Een mislukte controle bereikt je via een kanaal naast mail.',
         'pulled' => 'Oh Dear haalt de resultaten op, los van de mail van de applicatie.',
+        'pulled_own' => 'Een monitor haalt de resultaten op bij :endpoint, los van de mail van de applicatie.',
         'warn' => 'Een mislukte controle in bedrijf zou je niet bereiken als de mail uitvalt.',
         'off' => 'meldingen staan uit, en niets haalt de resultaten op',
-        'mail_only' => 'een mislukte controle wordt alleen per mail bezorgd, en als de mail uitvalt, is juist het bericht daarover het bericht dat niet aankomt. Voeg een Slack-webhook of het Oh Dear-endpoint toe.',
+        'mail_only' => 'een mislukte controle wordt alleen per mail bezorgd, en als de mail uitvalt, is juist het bericht daarover het bericht dat niet aankomt. Voeg een Slack-webhook of het Oh Dear-endpoint toe, of noem in production-preflight.health_endpoint een eigen endpoint dat een monitor ophaalt.',
         'none' => 'geen kanaal bezorgt een mislukte controle',
     ],
 
     'test-mode-keys' => [
         'label' => 'Inloggegevens in testmodus',
         'pass' => 'Geen inloggegevens van de configuratie staan in testmodus.',
+        'staging' => 'Niets te controleren: een stagingserver neemt betalingen aan met testsleutels, en een live sleutel zou daar echt geld bewegen.',
         'fail' => 'Instellingen in testmodus: :count. Er wordt geen echt geld verplaatst.',
         'stripe' => 'een Stripe-sleutel in testmodus',
         'mollie' => 'een Mollie-sleutel in testmodus',
@@ -216,9 +228,10 @@ return [
     'writable-directories' => [
         'label' => 'Schrijfbare mappen',
         'pass' => 'Elke map waarin Laravel schrijft is schrijfbaar.',
-        'fail' => 'Mappen waarin Laravel niet kan schrijven: :count. De eerste gebruikersactie die schrijft, mislukt.',
+        'fail' => 'Paden waarin Laravel op :server niet kan schrijven: :count. De eerste gebruikersactie die schrijft, mislukt.',
         'missing' => 'de map ontbreekt',
         'read_only' => 'de map is niet schrijfbaar voor de gebruiker die deze controle uitvoert',
+        'log_read_only' => 'het nieuwste logbestand is niet schrijfbaar voor de gebruiker die deze controle uitvoert, en een regel die hij logt gaat verloren',
     ],
 
     'storage-link' => [

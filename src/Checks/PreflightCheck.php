@@ -10,6 +10,7 @@ use Illuminate\Contracts\Translation\Translator;
 use Override;
 use Pushery\ProductionPreflight\Env\EnvFile;
 use Pushery\ProductionPreflight\Inspection;
+use Pushery\ProductionPreflight\Preflight;
 use Pushery\ProductionPreflight\Scope;
 use Pushery\ProductionPreflight\Stage;
 use Pushery\ProductionPreflight\Verdict;
@@ -31,6 +32,19 @@ use Spatie\Health\Checks\Result;
 abstract class PreflightCheck extends Check
 {
     public function __construct(protected readonly Application $app) {}
+
+    /**
+     * Whether the check can look in this process and with this configuration.
+     *
+     * A check that cannot answers undetermined every time it runs here. laravel-health stores that as
+     * skipped, and its default `treat_skipped_as_failure` counts it as a failure, so
+     * {@see Preflight::healthChecks()} leaves such a check out. One that
+     * could have looked and did not still answers undetermined, and that is a finding.
+     */
+    public function canLookHere(): bool
+    {
+        return true;
+    }
 
     /**
      * The name the check answers to, in laravel-health and under `production-preflight.acknowledged`.

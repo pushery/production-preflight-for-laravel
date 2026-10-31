@@ -51,6 +51,7 @@ return [
     'env-example-keys' => [
         'label' => 'Chaves do ficheiro de exemplo',
         'pass' => 'O .env e o seu ficheiro de exemplo nomeiam as mesmas chaves.',
+        'pass_optional' => 'O .env nomeia todas as chaves do seu ficheiro de exemplo, exceto :optional, que a aplicação declara opcionais.',
         'fail' => 'Chaves do ficheiro de exemplo que faltam no .env: :missing. Cada uma devolve null, e a sua funcionalidade não faz nada sem dizer nada. Chaves do .env que faltam no ficheiro de exemplo: :undocumented.',
         'warn' => 'Chaves do .env que faltam no ficheiro de exemplo: :undocumented. A próxima instalação nasce do exemplo e não as terá.',
         'missing' => 'nomeada no ficheiro de exemplo, falta no .env',
@@ -87,6 +88,15 @@ return [
         'whitespace' => 'o valor termina em espaços, que uma ferramenta que toma a linha à letra mantém, como o --env-file do Docker',
     ],
 
+    'development-stage-server' => [
+        'label' => 'Ambiente de desenvolvimento num servidor',
+        'pass' => 'A aplicação é servida em :host, que é uma máquina de desenvolvimento.',
+        'not_development' => 'Nada a verificar: só um ambiente de desenvolvimento é lido em relação ao seu host, e a aplicação declara o ambiente :stage.',
+        'no_host' => 'app.url não indica nenhum host, por isso não se pode avaliar se um servidor declara um ambiente de desenvolvimento.',
+        'fail' => 'APP_ENV é :env e app.url indica :host: um servidor que declara um ambiente de desenvolvimento, no qual todas as verificações de produção passam.',
+        'finding' => ':host não é um host sob o qual uma máquina de desenvolvimento é servida, por isso APP_ENV mantém provavelmente o valor de .env.example',
+    ],
+
     'app-debug' => [
         'label' => 'Modo de depuração',
         'pass' => 'O modo de depuração está desligado.',
@@ -119,15 +129,17 @@ return [
         'label' => 'Um segundo caminho para os alertas',
         'pass' => 'Uma verificação falhada chega até si por um canal além do email.',
         'pulled' => 'O Oh Dear recolhe os resultados, independentemente do email da aplicação.',
+        'pulled_own' => 'Um monitor recolhe os resultados em :endpoint, independentemente do email da aplicação.',
         'warn' => 'Uma verificação falhada em operação não chegaria até si se o email deixasse de funcionar.',
         'off' => 'as notificações estão desligadas, e nada recolhe os resultados',
-        'mail_only' => 'uma verificação falhada só é entregue por email, e quando o email deixa de funcionar, a mensagem sobre isso é precisamente a que não chega. Adicione um webhook do Slack ou o endpoint do Oh Dear.',
+        'mail_only' => 'uma verificação falhada só é entregue por email, e quando o email deixa de funcionar, a mensagem sobre isso é precisamente a que não chega. Adicione um webhook do Slack ou o endpoint do Oh Dear, ou indique em production-preflight.health_endpoint um endpoint próprio que um monitor consulte.',
         'none' => 'nenhum canal entrega uma verificação falhada',
     ],
 
     'test-mode-keys' => [
         'label' => 'Credenciais em modo de teste',
         'pass' => 'Nenhuma credencial da configuração está em modo de teste.',
+        'staging' => 'Nada a verificar: um servidor de staging recebe pagamentos com chaves de teste, e uma chave real movimentaria ali dinheiro de verdade.',
         'fail' => 'Definições em modo de teste: :count. Não se move dinheiro real.',
         'stripe' => 'uma chave do Stripe em modo de teste',
         'mollie' => 'uma chave do Mollie em modo de teste',
@@ -216,9 +228,10 @@ return [
     'writable-directories' => [
         'label' => 'Pastas com escrita',
         'pass' => 'Todas as pastas onde o Laravel escreve permitem escrita.',
-        'fail' => 'Pastas onde o Laravel não consegue escrever: :count. A primeira ação de um utilizador que escreve falha.',
+        'fail' => 'Caminhos onde o Laravel não consegue escrever em :server: :count. A primeira ação de um utilizador que escreve falha.',
         'missing' => 'a pasta falta',
         'read_only' => 'a pasta não permite escrita ao utilizador que executa esta verificação',
+        'log_read_only' => 'o ficheiro de registo mais recente não permite escrita ao utilizador que executa esta verificação, e uma linha que ele regista perde-se',
     ],
 
     'storage-link' => [

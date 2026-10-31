@@ -56,10 +56,10 @@ Exit codes: 0 no check failed, 1 a check failed, 2 a check could not look. A 2 i
 use Pushery\ProductionPreflight\Preflight;
 use Spatie\Health\Facades\Health;
 
-Health::checks(Preflight::checks());
+Health::checks(Preflight::healthChecks());
 ```
 
-laravel-health runs them with its scheduled `health:check`. Give it a channel besides mail, the Oh Dear endpoint or a Slack webhook in `config/health.php`: one of the findings is a mailer that delivers nothing, and that message would not arrive by mail.
+laravel-health runs them with its scheduled `health:check`. `healthChecks()` leaves out a check that cannot look in the process laravel-health runs it in: `opcache` on the command line, `php-version-parity` until the web server's binary is named, `env-over-http` until the probe is switched on, and `queue-restart` until `preflight --deploy` recorded a deploy. laravel-health counts a skipped check as a failure unless `health.treat_skipped_as_failure` says otherwise, so each of them would report a correctly configured server as failing. Give it a channel besides mail, the Oh Dear endpoint or a Slack webhook in `config/health.php`: one of the findings is a mailer that delivers nothing, and that message would not arrive by mail.
 
 ### 5. Lint a `.env`
 

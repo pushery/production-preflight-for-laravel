@@ -32,6 +32,15 @@ final class OpcacheCheck extends ProductionCheck
         parent::__construct($app);
     }
 
+    /**
+     * The command line has an OPcache of its own, and the web server's is read in a web request only.
+     */
+    #[Override]
+    public function canLookHere(): bool
+    {
+        return $this->sapi !== 'cli' && $this->sapi !== 'phpdbg';
+    }
+
     #[Override]
     public function key(): string
     {

@@ -8,6 +8,7 @@ use Pushery\ProductionPreflight\Checks\Configuration\AppDebugCheck;
 use Pushery\ProductionPreflight\Checks\Configuration\AppKeyCheck;
 use Pushery\ProductionPreflight\Checks\Configuration\CacheStoreCheck;
 use Pushery\ProductionPreflight\Checks\Configuration\DebugToolsCheck;
+use Pushery\ProductionPreflight\Checks\Configuration\DevelopmentStageServerCheck;
 use Pushery\ProductionPreflight\Checks\Configuration\HealthNotificationsCheck;
 use Pushery\ProductionPreflight\Checks\Configuration\LogLevelCheck;
 use Pushery\ProductionPreflight\Checks\Configuration\MailTransportCheck;
@@ -36,8 +37,8 @@ use Pushery\ProductionPreflight\Checks\PreflightCheck;
 /**
  * The checks of this package, in the order a report lists them.
  *
- * Register them with laravel-health in the application, `Health::checks(Preflight::checks())`, for
- * the scheduled runs. The two commands of this package run the same classes on their own.
+ * Register them with laravel-health in the application, `Health::checks(Preflight::healthChecks())`,
+ * for the scheduled runs. The two commands of this package run the same classes on their own.
  */
 final class Preflight
 {
@@ -50,6 +51,7 @@ final class Preflight
         PlaceholderValuesCheck::class,
         UnquotedHashCheck::class,
         EnvBytesCheck::class,
+        DevelopmentStageServerCheck::class,
         AppDebugCheck::class,
         AppKeyCheck::class,
         MailTransportCheck::class,
@@ -92,5 +94,22 @@ final class Preflight
         }
 
         return $checks;
+    }
+
+    /**
+     * The checks laravel-health can run in this process: those of {@see self::checks()} that can look
+     * here.
+     *
+     * laravel-health runs its checks from the scheduler, on the command line, and stores a check that
+     * could not look as skipped, which its default `treat_skipped_as_failure` counts as a failure. A
+     * check that cannot look in this process or with this configuration, OPcache on the command line
+     * or a probe nobody switched on, is left out rather than reported as a failure every time. The
+     * commands of this package run every check and say which could not look.
+     *
+     * @return list<PreflightCheck>
+     */
+    public static function healthChecks(Scope ...$scopes): array
+    {
+        return array_values(array_filter(self::checks(...$scopes), static fn (PreflightCheck $check): bool => $check->canLookHere()));
     }
 }

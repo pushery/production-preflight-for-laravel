@@ -51,6 +51,7 @@ return [
     'env-example-keys' => [
         'label' => 'Schlüssel der Beispieldatei',
         'pass' => 'Die .env und ihre Beispieldatei nennen dieselben Schlüssel.',
+        'pass_optional' => 'Die .env nennt jeden Schlüssel ihrer Beispieldatei, bis auf :optional, die die Anwendung als optional erklärt.',
         'fail' => 'Schlüssel der Beispieldatei, die in .env fehlen: :missing. Jeder liefert null, und sein Feature tut ohne ein Wort nichts. Schlüssel der .env, die in der Beispieldatei fehlen: :undocumented.',
         'warn' => 'Schlüssel der .env, die in der Beispieldatei fehlen: :undocumented. Die nächste Installation entsteht aus dem Beispiel und wird sie nicht haben.',
         'missing' => 'in der Beispieldatei genannt, fehlt in .env',
@@ -87,6 +88,15 @@ return [
         'whitespace' => 'der Wert endet mit Leerraum, den ein Werkzeug behält, das die Zeile wörtlich nimmt, etwa Dockers --env-file',
     ],
 
+    'development-stage-server' => [
+        'label' => 'Entwicklungsumgebung auf einem Server',
+        'pass' => 'Die Anwendung wird unter :host ausgeliefert, einem Rechner zum Entwickeln.',
+        'not_development' => 'Nichts zu prüfen: Nur eine Entwicklungsumgebung wird gegen ihren Host gelesen, und die Anwendung gibt die Umgebung :stage an.',
+        'no_host' => 'app.url nennt keinen Host, deshalb lässt sich nicht beurteilen, ob ein Server eine Entwicklungsumgebung angibt.',
+        'fail' => 'APP_ENV ist :env, und app.url nennt :host: ein Server, der eine Entwicklungsumgebung angibt und auf dem jeder Produktions-Check besteht.',
+        'finding' => ':host ist kein Host, unter dem ein Rechner zum Entwickeln ausgeliefert wird, APP_ENV trägt also wohl noch den Wert aus .env.example',
+    ],
+
     'app-debug' => [
         'label' => 'Debug-Modus',
         'pass' => 'Der Debug-Modus ist aus.',
@@ -119,15 +129,17 @@ return [
         'label' => 'Ein zweiter Weg für Alarme',
         'pass' => 'Eine fehlschlagende Prüfung erreicht dich über einen Kanal neben der Mail.',
         'pulled' => 'Oh Dear holt die Ergebnisse ab, unabhängig von der Mail der Anwendung.',
+        'pulled_own' => 'Ein Monitor holt die Ergebnisse unter :endpoint ab, unabhängig von der Mail der Anwendung.',
         'warn' => 'Eine fehlschlagende Prüfung im Betrieb würde dich nicht erreichen, wenn die Mail ausfällt.',
         'off' => 'Benachrichtigungen sind ausgeschaltet, und nichts holt die Ergebnisse ab',
-        'mail_only' => 'eine fehlschlagende Prüfung wird nur per Mail zugestellt, und wenn die Mail ausfällt, kommt genau die Nachricht darüber nicht an. Einen Slack-Webhook oder den Oh-Dear-Endpunkt hinzufügen.',
+        'mail_only' => 'eine fehlschlagende Prüfung wird nur per Mail zugestellt, und wenn die Mail ausfällt, kommt genau die Nachricht darüber nicht an. Einen Slack-Webhook oder den Oh-Dear-Endpunkt hinzufügen, oder einen eigenen Endpunkt, den ein Monitor abholt, in production-preflight.health_endpoint nennen.',
         'none' => 'kein Kanal stellt eine fehlschlagende Prüfung zu',
     ],
 
     'test-mode-keys' => [
         'label' => 'Zugangsdaten im Testmodus',
         'pass' => 'Keine Zugangsdaten der Konfiguration sind im Testmodus.',
+        'staging' => 'Nichts zu prüfen: Ein Staging-Server nimmt seine Zahlungen mit Testschlüsseln, und ein Live-Schlüssel bewegte dort echtes Geld.',
         'fail' => 'Einstellungen im Testmodus: :count. Es bewegt sich kein echtes Geld.',
         'stripe' => 'ein Stripe-Schlüssel im Testmodus',
         'mollie' => 'ein Mollie-Schlüssel im Testmodus',
@@ -216,9 +228,10 @@ return [
     'writable-directories' => [
         'label' => 'Beschreibbare Verzeichnisse',
         'pass' => 'Jedes Verzeichnis, in das Laravel schreibt, ist beschreibbar.',
-        'fail' => 'Verzeichnisse, in die Laravel nicht schreiben kann: :count. Die erste Nutzeraktion, die schreibt, fällt um.',
+        'fail' => 'Pfade, in die Laravel auf :server nicht schreiben kann: :count. Die erste Nutzeraktion, die schreibt, fällt um.',
         'missing' => 'das Verzeichnis fehlt',
         'read_only' => 'das Verzeichnis ist für den Nutzer, der diese Prüfung ausführt, nicht beschreibbar',
+        'log_read_only' => 'die neueste Log-Datei ist für den Nutzer, der diese Prüfung ausführt, nicht beschreibbar, und eine Zeile, die er schreibt, geht verloren',
     ],
 
     'storage-link' => [

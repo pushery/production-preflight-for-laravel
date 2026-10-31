@@ -41,6 +41,15 @@ final class EnvOverHttpCheck extends ProductionCheck
      */
     private const int READ = 65536;
 
+    /**
+     * The probe asks the site over HTTP only where it is switched on.
+     */
+    #[Override]
+    public function canLookHere(): bool
+    {
+        return (bool) $this->config('production-preflight.http_probe.enabled');
+    }
+
     #[Override]
     public function key(): string
     {
