@@ -27,6 +27,13 @@ return [
     ],
 
     /*
+    | Keys of the example file a server may leave out of its `.env`, because the application reads a
+    | default for each. An entry that ends in `*` matches every key it begins. `env-example-keys`
+    | passes where only such keys are missing, and names them.
+    */
+    'optional_env_keys' => [],
+
+    /*
     | The names of `app.env` that declare each stage, compared without case. The production rules
     | apply to production and staging. A name none of the lists holds is undetermined, and a check
     | that depends on the stage then says it could not tell instead of passing.
@@ -36,6 +43,21 @@ return [
         'staging' => ['staging', 'stage', 'preprod', 'uat'],
         'development' => ['local', 'testing', 'test', 'dev', 'development', 'ci'],
     ],
+
+    /*
+    | The endings of the host names a machine for development is served under. Where `app.env`
+    | declares a development stage and `app.url` names a host that ends in none of them, other than
+    | `localhost` and a loopback or private address, the application runs on a server, and
+    | `development-stage-server` fails.
+    */
+    'development_hosts' => ['.test', '.localhost', '.local'],
+
+    /*
+    | An endpoint of the application's own that a monitor pulls the health results from, such as
+    | `/health/state`. `health-notifications` counts it as a second road for alerts, as it counts
+    | the endpoint of Oh Dear.
+    */
+    'health_endpoint' => null,
 
     /*
     | Checks this application acknowledges, by key, each with its reason. An acknowledged check
@@ -49,7 +71,8 @@ return [
     | What the placeholder check takes for a value nobody replaced. `values` are compared without
     | case, and an entry that ends in `*` matches every value it begins. `required` names the keys
     | that must be set and not empty. A key whose name matches `secret_keys` also fails when its
-    | value is the one the committed example file carries.
+    | value is the one the committed example file carries, unless the value only refers to other
+    | keys. A `VITE_` key is left out of `secret_keys`: Vite compiles it into the page.
     */
     'placeholders' => [
         'values' => [
@@ -57,7 +80,7 @@ return [
             'replaceme', 'replace-me', 'todo', 'tbd', 'xxx*', 'your-*', 'your_*', '<*',
         ],
         'required' => [],
-        'secret_keys' => '/(?:^|_)(?:KEY|SECRET|PASSWORD|TOKEN)$/i',
+        'secret_keys' => '/^(?!VITE_)(?:.*_)?(?:KEY|SECRET|PASSWORD|TOKEN)$/i',
     ],
 
     /*

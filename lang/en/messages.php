@@ -51,6 +51,7 @@ return [
     'env-example-keys' => [
         'label' => 'Keys of the example file',
         'pass' => 'The .env and its example file name the same keys.',
+        'pass_optional' => 'The .env names every key of its example file, apart from :optional, which the application declares optional.',
         'fail' => 'Keys of the example file missing from .env: :missing. Each reads null, and its feature does nothing without a word. Keys of .env missing from the example file: :undocumented.',
         'warn' => 'Keys of .env missing from the example file: :undocumented. The next installation is set up from the example and will miss them.',
         'missing' => 'named in the example file, missing from .env',
@@ -87,6 +88,15 @@ return [
         'whitespace' => 'the value ends in whitespace, which a tool that takes the line literally, such as Docker\'s --env-file, keeps',
     ],
 
+    'development-stage-server' => [
+        'label' => 'Development stage on a server',
+        'pass' => 'The application is served at :host, which is a machine for development.',
+        'not_development' => 'Nothing to check: only a development stage is read against its host, and the application declares the :stage stage.',
+        'no_host' => 'app.url names no host, so whether a server declares a development stage cannot be judged.',
+        'fail' => 'APP_ENV is :env and app.url names :host: a server that declares a development stage, on which every production check passes.',
+        'finding' => ':host is no host a machine for development is served under, so APP_ENV probably still holds the value of .env.example',
+    ],
+
     'app-debug' => [
         'label' => 'Debug mode',
         'pass' => 'Debug mode is off.',
@@ -119,15 +129,17 @@ return [
         'label' => 'A second road for alerts',
         'pass' => 'A failing check reaches you through a channel besides mail.',
         'pulled' => 'Oh Dear pulls the results, independent of the application\'s mail.',
+        'pulled_own' => 'A monitor pulls the results from :endpoint, independent of the application\'s mail.',
         'warn' => 'A failing check in operation would not reach you if mail broke.',
         'off' => 'notifications are switched off, and nothing pulls the results',
-        'mail_only' => 'a failing check is delivered by mail alone, and when mail breaks, the message about it is the one that does not arrive. Add a Slack webhook or the Oh Dear endpoint.',
+        'mail_only' => 'a failing check is delivered by mail alone, and when mail breaks, the message about it is the one that does not arrive. Add a Slack webhook or the Oh Dear endpoint, or name an endpoint of the application\'s own that a monitor pulls in production-preflight.health_endpoint.',
         'none' => 'no channel delivers a failing check',
     ],
 
     'test-mode-keys' => [
         'label' => 'Credentials in test mode',
         'pass' => 'No credential of the configuration is in test mode.',
+        'staging' => 'Nothing to check: a staging server takes its payments with test keys, and a live key there would move real money.',
         'fail' => 'Settings in test mode: :count. No real payment moves.',
         'stripe' => 'a Stripe key in test mode',
         'mollie' => 'a Mollie key in test mode',
@@ -216,9 +228,10 @@ return [
     'writable-directories' => [
         'label' => 'Writable directories',
         'pass' => 'Every directory Laravel writes to is writable.',
-        'fail' => 'Directories Laravel cannot write to: :count. The first user action that writes falls over.',
+        'fail' => 'Paths Laravel cannot write to on :server: :count. The first user action that writes falls over.',
         'missing' => 'the directory is missing',
         'read_only' => 'the directory is not writable for the user that runs this check',
+        'log_read_only' => 'the newest log file is not writable for the user that runs this check, so a line it logs is lost',
     ],
 
     'storage-link' => [

@@ -33,6 +33,17 @@ final class PhpVersionParityCheck extends ProductionCheck
         parent::__construct($app);
     }
 
+    /**
+     * Without the web server's binary named there is no second version to compare.
+     */
+    #[Override]
+    public function canLookHere(): bool
+    {
+        $binary = $this->config('production-preflight.php.fpm');
+
+        return is_string($binary) && trim($binary) !== '';
+    }
+
     #[Override]
     public function key(): string
     {

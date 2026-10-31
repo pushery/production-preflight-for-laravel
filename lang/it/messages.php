@@ -51,6 +51,7 @@ return [
     'env-example-keys' => [
         'label' => 'Chiavi del file di esempio',
         'pass' => 'Il .env e il suo file di esempio nominano le stesse chiavi.',
+        'pass_optional' => 'Il .env nomina tutte le chiavi del suo file di esempio, tranne :optional, che l’applicazione dichiara facoltative.',
         'fail' => 'Chiavi del file di esempio che mancano in .env: :missing. Ognuna restituisce null, e la sua funzione non fa nulla senza dire nulla. Chiavi di .env che mancano nel file di esempio: :undocumented.',
         'warn' => 'Chiavi di .env che mancano nel file di esempio: :undocumented. La prossima installazione nasce dall’esempio e non le avrà.',
         'missing' => 'nominata nel file di esempio, manca in .env',
@@ -87,6 +88,15 @@ return [
         'whitespace' => 'il valore finisce con spazi, che uno strumento che prende la riga alla lettera conserva, come --env-file di Docker',
     ],
 
+    'development-stage-server' => [
+        'label' => 'Ambiente di sviluppo su un server',
+        'pass' => 'L’applicazione è servita su :host, che è una macchina di sviluppo.',
+        'not_development' => 'Niente da verificare: solo un ambiente di sviluppo viene letto rispetto al suo host, e l’applicazione dichiara l’ambiente :stage.',
+        'no_host' => 'app.url non indica alcun host, quindi non si può giudicare se un server dichiara un ambiente di sviluppo.',
+        'fail' => 'APP_ENV è :env e app.url indica :host: un server che dichiara un ambiente di sviluppo, su cui ogni controllo di produzione passa.',
+        'finding' => ':host non è un host con cui viene servita una macchina di sviluppo, quindi APP_ENV conserva probabilmente il valore di .env.example',
+    ],
+
     'app-debug' => [
         'label' => 'Modalità debug',
         'pass' => 'La modalità debug è disattivata.',
@@ -119,15 +129,17 @@ return [
         'label' => 'Una seconda strada per gli avvisi',
         'pass' => 'Un controllo fallito ti raggiunge attraverso un canale oltre all’email.',
         'pulled' => 'Oh Dear preleva i risultati, indipendentemente dall’email dell’applicazione.',
+        'pulled_own' => 'Un monitor preleva i risultati da :endpoint, indipendentemente dall’email dell’applicazione.',
         'warn' => 'Un controllo fallito in esercizio non ti raggiungerebbe se l’email smettesse di funzionare.',
         'off' => 'le notifiche sono disattivate, e nulla preleva i risultati',
-        'mail_only' => 'un controllo fallito viene consegnato solo per email, e quando l’email smette di funzionare, il messaggio al riguardo è proprio quello che non arriva. Aggiungi un webhook di Slack o l’endpoint di Oh Dear.',
+        'mail_only' => 'un controllo fallito viene consegnato solo per email, e quando l’email smette di funzionare, il messaggio al riguardo è proprio quello che non arriva. Aggiungi un webhook di Slack o l’endpoint di Oh Dear, oppure indica in production-preflight.health_endpoint un endpoint proprio che un monitor interroga.',
         'none' => 'nessun canale consegna un controllo fallito',
     ],
 
     'test-mode-keys' => [
         'label' => 'Credenziali in modalità test',
         'pass' => 'Nessuna credenziale della configurazione è in modalità test.',
+        'staging' => 'Niente da verificare: un server di staging incassa con chiavi di test, e una chiave live vi muoverebbe denaro vero.',
         'fail' => 'Impostazioni in modalità test: :count. Non si muove denaro reale.',
         'stripe' => 'una chiave Stripe in modalità test',
         'mollie' => 'una chiave Mollie in modalità test',
@@ -216,9 +228,10 @@ return [
     'writable-directories' => [
         'label' => 'Cartelle scrivibili',
         'pass' => 'Ogni cartella in cui Laravel scrive è scrivibile.',
-        'fail' => 'Cartelle in cui Laravel non può scrivere: :count. La prima azione dell’utente che scrive fallisce.',
+        'fail' => 'Percorsi in cui Laravel non può scrivere su :server: :count. La prima azione dell’utente che scrive fallisce.',
         'missing' => 'la cartella manca',
         'read_only' => 'la cartella non è scrivibile per l’utente che esegue questo controllo',
+        'log_read_only' => 'il file di log più recente non è scrivibile per l’utente che esegue questo controllo, e una riga che registra va persa',
     ],
 
     'storage-link' => [

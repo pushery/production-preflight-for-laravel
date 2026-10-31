@@ -20,9 +20,13 @@ use Spatie\Health\Notifications\CheckFailedNotification;
  * mail-transport check fails it, visible in the deploy tool and independent of the application's mail.
  *
  * So this check asks for a second road. Oh Dear's endpoint is one, a monitor that pulls the results
- * and reports even when the application is down; a Slack webhook is another, and so is any channel
- * besides mail. Without one, it warns. It never fails: mail alone is laravel-health's default, and a
- * check that stopped every standard installation would be switched off.
+ * and reports even when the application is down, and so is an endpoint of the application's own that a
+ * monitor pulls, named in `production-preflight.health_endpoint`. A Slack webhook is another, and so is
+ * any channel besides mail. Every notification class in `health.notifications.notifications` counts,
+ * since laravel-health sends each of them: laravel-health's own sends Slack through its webhook, and a
+ * class of the application's own routes Slack itself. Without a second road, it warns. It never fails:
+ * mail alone is laravel-health's default, and a check that stopped every standard installation would
+ * be switched off.
  */
 final class HealthNotificationsCheck extends ProductionCheck
 {
@@ -45,6 +49,12 @@ final class HealthNotificationsCheck extends ProductionCheck
             return Inspection::pass($this->message('health-notifications.pulled'));
         }
 
+        $endpoint = $this->config('production-preflight.health_endpoint');
+
+        if (is_string($endpoint) && trim($endpoint) !== '') {
+            return Inspection::pass($this->message('health-notifications.pulled_own', ['endpoint' => trim($endpoint)]));
+        }
+
         if (! (bool) $this->config('health.notifications.enabled')) {
             return Inspection::warn($this->message('health-notifications.warn'), [
                 new Finding('health.notifications.enabled', $this->message('health-notifications.off')),
@@ -52,12 +62,20 @@ final class HealthNotificationsCheck extends ProductionCheck
         }
 
         $notifications = $this->config('health.notifications.notifications');
-        $configured = is_array($notifications) ? ($notifications[CheckFailedNotification::class] ?? []) : [];
-        $channels = is_array($configured) ? array_values(array_filter($configured, is_string(...))) : [];
         $slack = $this->config('health.notifications.slack.webhook_url');
-        $others = array_diff($channels, ['mail', 'slack']);
+        $webhook = is_string($slack) && trim($slack) !== '';
+        $channels = [];
+        $reaches = false;
 
-        if ($others !== [] || (in_array('slack', $channels, true) && is_string($slack) && trim($slack) !== '')) {
+        foreach (is_array($notifications) ? $notifications : [] as $class => $configured) {
+            $named = is_array($configured) ? array_values(array_filter($configured, is_string(...))) : [];
+            $channels = [...$channels, ...$named];
+            $own = $class === CheckFailedNotification::class;
+            $beside = array_diff($named, $own ? ['mail', 'slack'] : ['mail']);
+            $reaches = $reaches || $beside !== [] || ($own && $webhook && in_array('slack', $named, true));
+        }
+
+        if ($reaches) {
             return Inspection::pass($this->message('health-notifications.pass'));
         }
 

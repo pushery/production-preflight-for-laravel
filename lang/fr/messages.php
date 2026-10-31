@@ -51,6 +51,7 @@ return [
     'env-example-keys' => [
         'label' => 'Clés du fichier d’exemple',
         'pass' => 'Le .env et son fichier d’exemple nomment les mêmes clés.',
+        'pass_optional' => 'Le .env nomme toutes les clés de son fichier d’exemple, sauf :optional, que l’application déclare facultatives.',
         'fail' => 'Clés du fichier d’exemple absentes de .env : :missing. Chacune vaut null, et sa fonctionnalité ne fait rien, sans un mot. Clés de .env absentes du fichier d’exemple : :undocumented.',
         'warn' => 'Clés de .env absentes du fichier d’exemple : :undocumented. La prochaine installation part de l’exemple et ne les aura pas.',
         'missing' => 'nommée dans le fichier d’exemple, absente de .env',
@@ -87,6 +88,15 @@ return [
         'whitespace' => 'la valeur se termine par des espaces, qu’un outil qui prend la ligne à la lettre conserve, comme --env-file de Docker',
     ],
 
+    'development-stage-server' => [
+        'label' => 'Environnement de développement sur un serveur',
+        'pass' => 'L’application est servie sur :host, qui est une machine de développement.',
+        'not_development' => 'Rien à vérifier : seul un environnement de développement est lu au regard de son hôte, et l’application déclare l’environnement :stage.',
+        'no_host' => 'app.url ne nomme aucun hôte, on ne peut donc pas juger si un serveur déclare un environnement de développement.',
+        'fail' => 'APP_ENV vaut :env et app.url nomme :host : un serveur qui déclare un environnement de développement, sur lequel toute vérification de production passe.',
+        'finding' => ':host n’est pas un hôte sous lequel une machine de développement est servie, APP_ENV garde donc sans doute la valeur de .env.example',
+    ],
+
     'app-debug' => [
         'label' => 'Mode débogage',
         'pass' => 'Le mode débogage est désactivé.',
@@ -119,15 +129,17 @@ return [
         'label' => 'Une seconde voie pour les alertes',
         'pass' => 'Une vérification en échec vous parvient par un canal autre que l’e-mail.',
         'pulled' => 'Oh Dear récupère les résultats, indépendamment des e-mails de l’application.',
+        'pulled_own' => 'Un moniteur récupère les résultats sur :endpoint, indépendamment des e-mails de l’application.',
         'warn' => 'Une vérification en échec en exploitation ne vous parviendrait pas si l’e-mail tombait en panne.',
         'off' => 'les notifications sont désactivées, et rien ne récupère les résultats',
-        'mail_only' => 'une vérification en échec n’est distribuée que par e-mail, et quand l’e-mail tombe en panne, c’est justement le message à ce sujet qui n’arrive pas. Ajoutez un webhook Slack ou le point d’accès Oh Dear.',
+        'mail_only' => 'une vérification en échec n’est distribuée que par e-mail, et quand l’e-mail tombe en panne, c’est justement le message à ce sujet qui n’arrive pas. Ajoutez un webhook Slack ou le point d’accès Oh Dear, ou nommez dans production-preflight.health_endpoint un point d’accès propre qu’un moniteur interroge.',
         'none' => 'aucun canal ne distribue une vérification en échec',
     ],
 
     'test-mode-keys' => [
         'label' => 'Identifiants en mode test',
         'pass' => 'Aucun identifiant de la configuration n’est en mode test.',
+        'staging' => 'Rien à vérifier : un serveur de préproduction encaisse avec des clés de test, et une clé réelle y déplacerait de l’argent véritable.',
         'fail' => 'Réglages en mode test : :count. Aucun paiement réel n’a lieu.',
         'stripe' => 'une clé Stripe en mode test',
         'mollie' => 'une clé Mollie en mode test',
@@ -216,9 +228,10 @@ return [
     'writable-directories' => [
         'label' => 'Répertoires accessibles en écriture',
         'pass' => 'Chaque répertoire où Laravel écrit est accessible en écriture.',
-        'fail' => 'Répertoires où Laravel ne peut pas écrire : :count. La première action d’un utilisateur qui écrit échoue.',
+        'fail' => 'Chemins où Laravel ne peut pas écrire sur :server : :count. La première action d’un utilisateur qui écrit échoue.',
         'missing' => 'le répertoire est absent',
         'read_only' => 'le répertoire n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification',
+        'log_read_only' => 'le fichier journal le plus récent n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification, et une ligne qu’il journalise est perdue',
     ],
 
     'storage-link' => [

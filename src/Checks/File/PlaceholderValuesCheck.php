@@ -26,15 +26,19 @@ use Pushery\ProductionPreflight\Stage;
  * `REDIS_PASSWORD=null` and `MAIL_PASSWORD=null`, and a check that flagged every default
  * installation would be switched off at once. A project that never means it adds it.
  *
+ * A value that only refers to other keys, `${REVERB_APP_KEY}`, is not compared with the example: it
+ * carries no secret of its own, and the key it names is checked itself.
+ *
  * The stage is read from the file's own `APP_ENV` where it sets one, so a production file linted in
  * a pipeline that runs as `testing` is still held to the production rule.
  */
 final class PlaceholderValuesCheck extends PreflightCheck
 {
     /**
-     * The names that hold a credential unless the configuration says otherwise.
+     * The names that hold a credential unless the configuration says otherwise. A `VITE_` key is left
+     * out: Vite compiles it into the JavaScript every visitor loads, so it is public by design.
      */
-    public const string SECRET_KEYS = '/(?:^|_)(?:KEY|SECRET|PASSWORD|TOKEN)$/i';
+    public const string SECRET_KEYS = '/^(?!VITE_)(?:.*_)?(?:KEY|SECRET|PASSWORD|TOKEN)$/i';
 
     #[Override]
     public function key(): string
@@ -74,7 +78,7 @@ final class PlaceholderValuesCheck extends PreflightCheck
             $reason = match (true) {
                 $value === '' => null,
                 $this->isPlaceholder($value) => 'placeholder-values.placeholder',
-                $example instanceof EnvFile && $this->isSecret($key) && ! $this->isLiteral($value) && $example->last($key)?->value() === $value => 'placeholder-values.from_example',
+                $example instanceof EnvFile && $this->isSecret($key) && ! $this->isLiteral($value) && ! $this->isReference($value) && $example->last($key)?->value() === $value => 'placeholder-values.from_example',
                 default => null,
             };
 
@@ -137,6 +141,15 @@ final class PlaceholderValuesCheck extends PreflightCheck
     private function isLiteral(string $value): bool
     {
         return in_array(strtolower($value), ['null', '(null)', 'empty', '(empty)', 'true', '(true)', 'false', '(false)'], true);
+    }
+
+    /**
+     * Whether a value only refers to other keys, one `${NAME}` after another and nothing else. Laravel's
+     * example file sets `VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"`, and a server keeps the line as it is.
+     */
+    private function isReference(string $value): bool
+    {
+        return preg_match('/^(?:\$\{[A-Za-z_][A-Za-z0-9_]*\})+$/', $value) === 1;
     }
 
     /**

@@ -51,6 +51,7 @@ return [
     'env-example-keys' => [
         'label' => 'Claves del archivo de ejemplo',
         'pass' => 'El .env y su archivo de ejemplo nombran las mismas claves.',
+        'pass_optional' => 'El .env nombra todas las claves de su archivo de ejemplo, salvo :optional, que la aplicación declara opcionales.',
         'fail' => 'Claves del archivo de ejemplo que faltan en .env: :missing. Cada una devuelve null, y su función no hace nada sin decir nada. Claves de .env que faltan en el archivo de ejemplo: :undocumented.',
         'warn' => 'Claves de .env que faltan en el archivo de ejemplo: :undocumented. La próxima instalación se crea a partir del ejemplo y no las tendrá.',
         'missing' => 'nombrada en el archivo de ejemplo, falta en .env',
@@ -87,6 +88,15 @@ return [
         'whitespace' => 'el valor termina en espacios, que conserva una herramienta que toma la línea al pie de la letra, como --env-file de Docker',
     ],
 
+    'development-stage-server' => [
+        'label' => 'Entorno de desarrollo en un servidor',
+        'pass' => 'La aplicación se sirve en :host, que es una máquina de desarrollo.',
+        'not_development' => 'Nada que comprobar: solo un entorno de desarrollo se lee contra su host, y la aplicación declara el entorno :stage.',
+        'no_host' => 'app.url no nombra ningún host, así que no se puede juzgar si un servidor declara un entorno de desarrollo.',
+        'fail' => 'APP_ENV es :env y app.url nombra :host: un servidor que declara un entorno de desarrollo, en el que pasa toda comprobación de producción.',
+        'finding' => ':host no es un host bajo el que se sirva una máquina de desarrollo, así que APP_ENV probablemente conserva el valor de .env.example',
+    ],
+
     'app-debug' => [
         'label' => 'Modo de depuración',
         'pass' => 'El modo de depuración está desactivado.',
@@ -119,15 +129,17 @@ return [
         'label' => 'Un segundo camino para las alertas',
         'pass' => 'Una comprobación fallida te llega por un canal además del correo.',
         'pulled' => 'Oh Dear recoge los resultados, con independencia del correo de la aplicación.',
+        'pulled_own' => 'Un monitor recoge los resultados en :endpoint, con independencia del correo de la aplicación.',
         'warn' => 'Una comprobación fallida en operación no te llegaría si el correo dejara de funcionar.',
         'off' => 'las notificaciones están desactivadas, y nada recoge los resultados',
-        'mail_only' => 'una comprobación fallida solo se entrega por correo, y cuando el correo deja de funcionar, el mensaje sobre ello es justo el que no llega. Añade un webhook de Slack o el endpoint de Oh Dear.',
+        'mail_only' => 'una comprobación fallida solo se entrega por correo, y cuando el correo deja de funcionar, el mensaje sobre ello es justo el que no llega. Añade un webhook de Slack o el endpoint de Oh Dear, o nombra en production-preflight.health_endpoint un endpoint propio que recoja un monitor.',
         'none' => 'ningún canal entrega una comprobación fallida',
     ],
 
     'test-mode-keys' => [
         'label' => 'Credenciales en modo de prueba',
         'pass' => 'Ninguna credencial de la configuración está en modo de prueba.',
+        'staging' => 'Nada que comprobar: un servidor de staging cobra con claves de prueba, y una clave real movería allí dinero de verdad.',
         'fail' => 'Ajustes en modo de prueba: :count. No se mueve dinero real.',
         'stripe' => 'una clave de Stripe en modo de prueba',
         'mollie' => 'una clave de Mollie en modo de prueba',
@@ -216,9 +228,10 @@ return [
     'writable-directories' => [
         'label' => 'Directorios con escritura',
         'pass' => 'Todos los directorios en los que escribe Laravel admiten escritura.',
-        'fail' => 'Directorios en los que Laravel no puede escribir: :count. La primera acción de usuario que escribe falla.',
+        'fail' => 'Rutas en las que Laravel no puede escribir en :server: :count. La primera acción de usuario que escribe falla.',
         'missing' => 'el directorio falta',
         'read_only' => 'el directorio no admite escritura para el usuario que ejecuta esta comprobación',
+        'log_read_only' => 'el archivo de registro más reciente no admite escritura para el usuario que ejecuta esta comprobación, y una línea que registre se pierde',
     ],
 
     'storage-link' => [

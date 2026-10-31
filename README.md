@@ -64,8 +64,10 @@ Report in operation through laravel-health, in the `boot` method of a service pr
 use Pushery\ProductionPreflight\Preflight;
 use Spatie\Health\Facades\Health;
 
-Health::checks(Preflight::checks());
+Health::checks(Preflight::healthChecks());
 ```
+
+`healthChecks()` leaves out a check that cannot look in the process laravel-health runs it in: `opcache` on the command line, `php-version-parity` until the web server's binary is named, `env-over-http` until the probe is switched on, and `queue-restart` until `preflight --deploy` recorded a deploy. laravel-health counts a skipped check as a failure unless `health.treat_skipped_as_failure` says otherwise, so each of them would report a correctly configured server as failing.
 
 Lint a `.env` file on its own, in a pipeline or on a schedule:
 

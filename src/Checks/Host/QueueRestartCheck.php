@@ -31,6 +31,15 @@ final class QueueRestartCheck extends ProductionCheck
      */
     public const string SIGNAL = 'illuminate:queue:restart';
 
+    /**
+     * Until `preflight --deploy` recorded a deploy there is no moment to hold the restart signal against.
+     */
+    #[Override]
+    public function canLookHere(): bool
+    {
+        return DeployRecord::read($this->app) !== null;
+    }
+
     #[Override]
     public function key(): string
     {
