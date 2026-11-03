@@ -228,10 +228,12 @@ return [
     'writable-directories' => [
         'label' => 'Pastas com escrita',
         'pass' => 'Todas as pastas onde o Laravel escreve permitem escrita.',
-        'fail' => 'Caminhos onde o Laravel não consegue escrever em :server: :count. A primeira ação de um utilizador que escreve falha.',
+        'fail' => 'Caminhos onde o Laravel não consegue escrever em :server, verificado como :user: :count. A primeira ação de um utilizador que escreve falha.',
+        'fail_unknown_user' => 'Caminhos onde o Laravel não consegue escrever em :server: :count. Não foi possível nomear o utilizador com que esta verificação corre. A primeira ação de um utilizador que escreve falha.',
         'missing' => 'a pasta falta',
         'read_only' => 'a pasta não permite escrita ao utilizador que executa esta verificação',
         'log_read_only' => 'o ficheiro de registo mais recente não permite escrita ao utilizador que executa esta verificação, e uma linha que ele regista perde-se',
+        'log_directory_read_only' => 'a pasta do ficheiro de registo mais recente não permite escrita ao utilizador que executa esta verificação, e o ficheiro do dia seguinte não pode ser criado',
     ],
 
     'storage-link' => [

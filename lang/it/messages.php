@@ -228,10 +228,12 @@ return [
     'writable-directories' => [
         'label' => 'Cartelle scrivibili',
         'pass' => 'Ogni cartella in cui Laravel scrive è scrivibile.',
-        'fail' => 'Percorsi in cui Laravel non può scrivere su :server: :count. La prima azione dell’utente che scrive fallisce.',
+        'fail' => 'Percorsi in cui Laravel non può scrivere su :server, controllato come :user: :count. La prima azione dell’utente che scrive fallisce.',
+        'fail_unknown_user' => 'Percorsi in cui Laravel non può scrivere su :server: :count. Non è stato possibile nominare l’utente con cui gira questo controllo. La prima azione dell’utente che scrive fallisce.',
         'missing' => 'la cartella manca',
         'read_only' => 'la cartella non è scrivibile per l’utente che esegue questo controllo',
         'log_read_only' => 'il file di log più recente non è scrivibile per l’utente che esegue questo controllo, e una riga che registra va persa',
+        'log_directory_read_only' => 'la cartella del file di log più recente non è scrivibile per l’utente che esegue questo controllo, e il file del giorno dopo non può essere creato',
     ],
 
     'storage-link' => [

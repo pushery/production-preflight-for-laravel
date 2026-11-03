@@ -228,10 +228,12 @@ return [
     'writable-directories' => [
         'label' => 'Beschreibbare Verzeichnisse',
         'pass' => 'Jedes Verzeichnis, in das Laravel schreibt, ist beschreibbar.',
-        'fail' => 'Pfade, in die Laravel auf :server nicht schreiben kann: :count. Die erste Nutzeraktion, die schreibt, fällt um.',
+        'fail' => 'Pfade, in die Laravel auf :server nicht schreiben kann, gefragt als :user: :count. Die erste Nutzeraktion, die schreibt, fällt um.',
+        'fail_unknown_user' => 'Pfade, in die Laravel auf :server nicht schreiben kann: :count. Der Nutzer, als der diese Prüfung läuft, ließ sich nicht benennen. Die erste Nutzeraktion, die schreibt, fällt um.',
         'missing' => 'das Verzeichnis fehlt',
         'read_only' => 'das Verzeichnis ist für den Nutzer, der diese Prüfung ausführt, nicht beschreibbar',
         'log_read_only' => 'die neueste Log-Datei ist für den Nutzer, der diese Prüfung ausführt, nicht beschreibbar, und eine Zeile, die er schreibt, geht verloren',
+        'log_directory_read_only' => 'das Verzeichnis der neuesten Log-Datei ist für den Nutzer, der diese Prüfung ausführt, nicht beschreibbar, und die Datei des nächsten Tages kann nicht entstehen',
     ],
 
     'storage-link' => [

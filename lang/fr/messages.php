@@ -228,10 +228,12 @@ return [
     'writable-directories' => [
         'label' => 'Répertoires accessibles en écriture',
         'pass' => 'Chaque répertoire où Laravel écrit est accessible en écriture.',
-        'fail' => 'Chemins où Laravel ne peut pas écrire sur :server : :count. La première action d’un utilisateur qui écrit échoue.',
+        'fail' => 'Chemins où Laravel ne peut pas écrire sur :server, vérifié en tant que :user : :count. La première action d’un utilisateur qui écrit échoue.',
+        'fail_unknown_user' => 'Chemins où Laravel ne peut pas écrire sur :server : :count. L’utilisateur sous lequel cette vérification s’exécute n’a pas pu être nommé. La première action d’un utilisateur qui écrit échoue.',
         'missing' => 'le répertoire est absent',
         'read_only' => 'le répertoire n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification',
         'log_read_only' => 'le fichier journal le plus récent n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification, et une ligne qu’il journalise est perdue',
+        'log_directory_read_only' => 'le répertoire du fichier journal le plus récent n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification, et le fichier du lendemain ne peut pas être créé',
     ],
 
     'storage-link' => [

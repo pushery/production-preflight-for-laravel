@@ -228,10 +228,12 @@ return [
     'writable-directories' => [
         'label' => 'Schrijfbare mappen',
         'pass' => 'Elke map waarin Laravel schrijft is schrijfbaar.',
-        'fail' => 'Paden waarin Laravel op :server niet kan schrijven: :count. De eerste gebruikersactie die schrijft, mislukt.',
+        'fail' => 'Paden waarin Laravel op :server niet kan schrijven, gevraagd als :user: :count. De eerste gebruikersactie die schrijft, mislukt.',
+        'fail_unknown_user' => 'Paden waarin Laravel op :server niet kan schrijven: :count. De gebruiker waarmee deze controle draait, kon niet worden genoemd. De eerste gebruikersactie die schrijft, mislukt.',
         'missing' => 'de map ontbreekt',
         'read_only' => 'de map is niet schrijfbaar voor de gebruiker die deze controle uitvoert',
         'log_read_only' => 'het nieuwste logbestand is niet schrijfbaar voor de gebruiker die deze controle uitvoert, en een regel die hij logt gaat verloren',
+        'log_directory_read_only' => 'de map van het nieuwste logbestand is niet schrijfbaar voor de gebruiker die deze controle uitvoert, en het bestand van de volgende dag kan niet worden aangemaakt',
     ],
 
     'storage-link' => [

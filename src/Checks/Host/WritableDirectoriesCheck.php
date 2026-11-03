@@ -11,6 +11,7 @@ use Pushery\ProductionPreflight\Evidence;
 use Pushery\ProductionPreflight\Finding;
 use Pushery\ProductionPreflight\Inspection;
 use Pushery\ProductionPreflight\Scope;
+use Pushery\ProductionPreflight\Support\ProcessUser;
 
 /**
  * The directories Laravel writes to, missing or not writable: the first user action that writes,
@@ -24,9 +25,15 @@ use Pushery\ProductionPreflight\Scope;
  * through their group, the directory takes new files from both while the current file takes lines from
  * its owner only: the directory reads as writable, and the next line of the other process is lost.
  *
- * A failure names the server, and carries it as `server` evidence. Where several servers run the
- * scheduler, the check runs on whichever one the minute picked, and a finding without the server leaves
- * open which machine has the wrong permissions.
+ * The newest file is looked for one level below the log directory as well, where a channel with a directory
+ * of its own writes its file of the day. There that directory is asked too, because the file of the next day is
+ * created in it.
+ *
+ * A failure names the server and the user, and carries both as evidence, `server` and `user`. Where several
+ * servers run the scheduler, the check runs on whichever one the minute picked, and a finding without the server
+ * leaves open which machine has the wrong permissions. The user comes from the system's user database
+ * ({@see ProcessUser}), because the one an environment variable names is often somebody else, and where the
+ * system cannot name it, the failure says so.
  */
 final class WritableDirectoriesCheck extends ProductionCheck
 {
@@ -66,26 +73,44 @@ final class WritableDirectoriesCheck extends ProductionCheck
             $findings[] = new Finding($this->relative($log), $this->message('writable-directories.log_read_only'));
         }
 
+        $channel = $log === null ? null : dirname($log);
+
+        if ($channel !== null && $channel !== $this->app->storagePath('logs') && ! $files->isWritable($channel)) {
+            $findings[] = new Finding($this->relative($channel), $this->message('writable-directories.log_directory_read_only'));
+        }
+
         if ($findings === []) {
             return Inspection::pass($this->message('writable-directories.pass'));
         }
 
         $server = gethostname() ?: php_uname('n');
+        $user = $this->app->make(ProcessUser::class)->name();
+        $evidence = [new Evidence('server', $server)];
+
+        if ($user !== null) {
+            $evidence[] = new Evidence('user', $user);
+        }
 
         return Inspection::fail(
-            $this->message('writable-directories.fail', ['count' => count($findings), 'server' => $server]),
+            $user === null
+                ? $this->message('writable-directories.fail_unknown_user', ['count' => count($findings), 'server' => $server])
+                : $this->message('writable-directories.fail', ['count' => count($findings), 'server' => $server, 'user' => $user]),
             $findings,
-            [new Evidence('server', $server)],
+            $evidence,
         );
     }
 
-    /** The newest log file in the log directory, by its modification time, or null where there is none. */
+    /**
+     * The newest log file, by its modification time, in the log directory or in a directory one level below it,
+     * or null where there is none.
+     */
     private function newestLog(Filesystem $files): ?string
     {
+        $logs = $this->app->storagePath('logs');
         $newest = null;
         $at = -1;
 
-        foreach (array_filter($files->glob($this->app->storagePath('logs').'/*.log'), is_string(...)) as $log) {
+        foreach (array_filter([...$files->glob($logs.'/*.log'), ...$files->glob($logs.'/*/*.log')], is_string(...)) as $log) {
             $modified = $files->isFile($log) ? $files->lastModified($log) : -1;
 
             if ($modified > $at) {

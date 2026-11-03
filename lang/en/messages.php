@@ -228,10 +228,12 @@ return [
     'writable-directories' => [
         'label' => 'Writable directories',
         'pass' => 'Every directory Laravel writes to is writable.',
-        'fail' => 'Paths Laravel cannot write to on :server: :count. The first user action that writes falls over.',
+        'fail' => 'Paths Laravel cannot write to on :server, asked as :user: :count. The first user action that writes falls over.',
+        'fail_unknown_user' => 'Paths Laravel cannot write to on :server: :count. The user this check runs as could not be named. The first user action that writes falls over.',
         'missing' => 'the directory is missing',
         'read_only' => 'the directory is not writable for the user that runs this check',
         'log_read_only' => 'the newest log file is not writable for the user that runs this check, so a line it logs is lost',
+        'log_directory_read_only' => 'the directory of the newest log file is not writable for the user that runs this check, so the file of the next day cannot be created',
     ],
 
     'storage-link' => [

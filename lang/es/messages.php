@@ -228,10 +228,12 @@ return [
     'writable-directories' => [
         'label' => 'Directorios con escritura',
         'pass' => 'Todos los directorios en los que escribe Laravel admiten escritura.',
-        'fail' => 'Rutas en las que Laravel no puede escribir en :server: :count. La primera acción de usuario que escribe falla.',
+        'fail' => 'Rutas en las que Laravel no puede escribir en :server, consultado como :user: :count. La primera acción de usuario que escribe falla.',
+        'fail_unknown_user' => 'Rutas en las que Laravel no puede escribir en :server: :count. No se pudo nombrar al usuario con el que se ejecuta esta comprobación. La primera acción de usuario que escribe falla.',
         'missing' => 'el directorio falta',
         'read_only' => 'el directorio no admite escritura para el usuario que ejecuta esta comprobación',
         'log_read_only' => 'el archivo de registro más reciente no admite escritura para el usuario que ejecuta esta comprobación, y una línea que registre se pierde',
+        'log_directory_read_only' => 'el directorio del archivo de registro más reciente no admite escritura para el usuario que ejecuta esta comprobación, y el archivo del día siguiente no se puede crear',
     ],
 
     'storage-link' => [
