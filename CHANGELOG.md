@@ -4,6 +4,16 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.3.0] - 2026-11-03
+
+### ✨ Added
+
+- **`writable-directories` names the user it asks as, and looks for the newest log file one level down.** A failure names the user the process runs as, read from the system's user database and not from `USER`, which under `sudo -u`, a process supervisor or a container entrypoint names whoever started the process. Where the system cannot name the user, the failure says so, and otherwise the user is carried as `user` evidence beside `server`. The newest log file is looked for one level below `storage/logs` as well, where a channel with a directory of its own writes its file of the day, and that directory is asked too, because the file of the next day is created in it. Naming the user takes the POSIX extension, which `composer.json` now suggests.
+
+### 🐛 Fixed
+
+- **`env-example-keys` takes a key the example file names on a commented line as named.** An example file writes an optional key commented, with the default it leaves in force, as in `# FEED_BATCH=50`. A server that set such a key was told it was missing from the example file, one warning per key, and since `env:lint` counts a warning as a finding, its run ended with exit code 1 every day. The commented line now names the key in that direction. A commented line still asks nothing of `.env`, and a sentence in a comment that happens to hold an equals sign names no key.
+
 ## [0.2.0] - 2026-10-31
 
 ### ✨ Added
@@ -27,6 +37,7 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/pushery/production-preflight-for-laravel/releases/tag/v0.1.0

@@ -11,7 +11,8 @@ namespace Pushery\ProductionPreflight\Env;
  * gets the guard switched off, and then it is missing at the moment it was built for. So the reader
  * takes the special cases one by one instead of trusting one regular expression:
  *
- * - A comment line, `# KEY=value`, sets nothing.
+ * - A comment line, `# KEY=value`, sets nothing. It still names its key, which `commentedKeys()`
+ *   answers: an example file writes an optional key that way, with the default it leaves in force.
  * - The `export` prefix is not part of the key.
  * - A value may contain `=`, `DSN="a=b;c=d"`: the line is split at its FIRST equals sign.
  * - An empty value, `KEY=`, sets the key and counts.
@@ -30,11 +31,13 @@ final readonly class EnvFile
 
     /**
      * @param  list<Assignment>  $assignments  in the order of the file
+     * @param  list<string>  $commented  the keys commented lines name, once each, in the order of the file
      */
     private function __construct(
         public string $path,
         public string $bytes,
         public array $assignments,
+        private array $commented,
     ) {}
 
     /**
@@ -50,6 +53,7 @@ final readonly class EnvFile
     public static function parse(string $path, string $bytes): self
     {
         $assignments = [];
+        $commented = [];
         $openQuote = null;
         $text = str_starts_with($bytes, self::BYTE_ORDER_MARK) ? substr($bytes, 3) : $bytes;
 
@@ -67,10 +71,18 @@ final readonly class EnvFile
             if ($assignment instanceof Assignment) {
                 $assignments[] = $assignment;
                 $openQuote = self::unclosedQuote($assignment->raw);
+
+                continue;
+            }
+
+            $commentedKey = self::commentedKey($line);
+
+            if ($commentedKey !== null) {
+                $commented[] = $commentedKey;
             }
         }
 
-        return new self($path, $bytes, $assignments);
+        return new self($path, $bytes, $assignments, array_values(array_unique($commented)));
     }
 
     /**
@@ -81,6 +93,17 @@ final readonly class EnvFile
     public function keys(): array
     {
         return array_values(array_unique(array_map(static fn (Assignment $assignment): string => $assignment->key, $this->assignments)));
+    }
+
+    /**
+     * Every key a commented line names, `# KEY=value`, once each, in the order of its first line.
+     * Such a line sets nothing; an example file uses it to name a key and leave its default in force.
+     *
+     * @return list<string>
+     */
+    public function commentedKeys(): array
+    {
+        return $this->commented;
     }
 
     /**
@@ -166,6 +189,17 @@ final readonly class EnvFile
         }
 
         return new Assignment($key, ltrim(substr($trimmed, $separator + 1)), $number);
+    }
+
+    /**
+     * The key a commented line names, `# KEY=value`, or null for any other comment. It takes the
+     * same test as a line that sets a key, so a sentence with an equals sign in it names nothing.
+     */
+    private static function commentedKey(string $line): ?string
+    {
+        $trimmed = ltrim($line);
+
+        return str_starts_with($trimmed, '#') ? self::assignment(ltrim(ltrim($trimmed, '#')), 0)?->key : null;
     }
 
     /**

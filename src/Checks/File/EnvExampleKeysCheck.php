@@ -24,6 +24,11 @@ use Pushery\ProductionPreflight\Scope;
  * misses the key, and then the first direction fails against it. A check that knew only one direction
  * would produce the cause of the other one's finding.
  *
+ * A key the example names on a commented line, `# KEY=default`, is not missing from it: the line
+ * documents the key and leaves its default in force, the usual way an example file writes an optional
+ * key. It counts as named in this direction, and in the first one, where a commented line sets
+ * nothing, it is not asked for.
+ *
  * A key the application reads with a default of its own may be left out of a server's `.env` on
  * purpose. `production-preflight.optional_env_keys` declares such keys, and a missing one does not
  * fail: the check passes and names it. Every other missing key still fails.
@@ -60,7 +65,7 @@ final class EnvExampleKeysCheck extends PreflightCheck
         $absent = array_values(array_diff($example->keys(), $env->keys()));
         $optional = array_values(array_filter($absent, $this->declaredOptional(...)));
         $missing = array_values(array_diff($absent, $optional));
-        $undocumented = array_values(array_diff($env->keys(), $example->keys()));
+        $undocumented = array_values(array_diff($env->keys(), $example->keys(), $example->commentedKeys()));
         $findings = [
             ...array_map(fn (string $key): Finding => new Finding($key, $this->message('env-example-keys.missing')), $missing),
             ...array_map(fn (string $key): Finding => new Finding($key, $this->message('env-example-keys.undocumented')), $undocumented),

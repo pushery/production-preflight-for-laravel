@@ -58,7 +58,7 @@
     "laravel/mcp": "^1.0",
     "laravel/pao": "^1.1",
     "laravel/pint": "^1.0",
-    "orchestra/testbench": "^11.0",
+    "orchestra/testbench": "^11.2",
     "pestphp/pest": "^5.2.1",
     "pestphp/pest-plugin-agent": "^5.0",
     "pestphp/pest-plugin-browser": "^5.2",
@@ -71,6 +71,9 @@
     "rector/rector": "^2.7.0",
     "spaze/phpstan-disallowed-calls": "^4.12",
     "symfony/yaml": "^7.4.17 || ^8.1.5"
+  },
+  "suggest": {
+    "ext-posix": "Lets writable-directories name the user the process runs as. Without it, a failure says that the user could not be named."
   },
   "autoload": {
     "psr-4": {
