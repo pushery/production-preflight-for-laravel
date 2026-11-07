@@ -4,6 +4,12 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.4.0] - 2026-11-07
+
+### 🐛 Fixed
+
+- **`config-cache-fresh` no longer reports a deploy that changed `.env`.** On a zero-downtime deploy the releases share one `.env`, and each caches its own configuration, so for the minutes a deploy takes, the release still live ran on a cache older than the `.env` the deploy had just changed, and the check failed until the new release took over. It now reports a newer `.env` once it has been the newer one for 15 minutes. `production-preflight.config_cache.grace_minutes`, or `PRODUCTION_PREFLIGHT_CONFIG_CACHE_GRACE`, sets the wait, and 0 reports at once, as before.
+
 ## [0.3.0] - 2026-11-03
 
 ### ✨ Added
@@ -37,7 +43,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/pushery/production-preflight-for-laravel/releases/tag/v0.1.0
