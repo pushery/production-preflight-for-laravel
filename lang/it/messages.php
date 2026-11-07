@@ -201,6 +201,7 @@ return [
     'config-cache-fresh' => [
         'label' => 'Configurazione in cache',
         'pass' => 'La configurazione in cache è più recente di .env.',
+        'within_grace' => '.env è cambiato dopo che la configurazione è stata messa in cache, meno di :minutes minuti fa. Un deploy ha questo tempo per rimetterla in cache.',
         'fail' => 'L’applicazione gira su una configurazione precedente all’ultima modifica di .env.',
         'finding' => '.env è cambiato dopo che la configurazione è stata messa in cache, quindi i suoi nuovi valori non valgono. Esegui php artisan config:cache.',
         'not_cached' => 'La configurazione non è in cache, quindi ogni richiesta legge .env e una modifica vale subito.',

@@ -115,4 +115,17 @@ return [
             : 10,
     ],
 
+    /*
+    | The config-cache-fresh check reports a cached configuration older than `.env` only once `.env`
+    | has been the newer one for this many minutes. On a zero-downtime deploy the releases share one
+    | `.env`, and each caches its own configuration, so while a deploy that changed `.env` runs, the
+    | release still live reads a cache older than it. The value is held to at least 0, where 0
+    | reports at once, and a value that is no such number keeps the 15 shipped here.
+    */
+    'config_cache' => [
+        'grace_minutes' => is_numeric($cacheGrace = env('PRODUCTION_PREFLIGHT_CONFIG_CACHE_GRACE')) && (int) $cacheGrace >= 0
+            ? (int) $cacheGrace
+            : 15,
+    ],
+
 ];
