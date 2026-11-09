@@ -53,7 +53,7 @@ final class EnvBytesCheck extends PreflightCheck
         }
 
         if ($file->carriageReturns() > 0) {
-            $findings[] = new Finding($this->message('env-bytes.endings'), $this->message('env-bytes.endings_statement', ['count' => $file->carriageReturns()]));
+            $findings[] = new Finding($this->message('env-bytes.endings'), $this->messageChoice('env-bytes.endings_statement', $file->carriageReturns()));
         }
 
         foreach ($file->assignments as $assignment) {

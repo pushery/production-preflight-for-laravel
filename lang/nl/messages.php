@@ -84,7 +84,7 @@ return [
         'mark' => 'byte order mark',
         'mark_statement' => 'het bestand begint ermee, en een shell die het bestand inleest houdt hem voor een deel van de eerste naam',
         'endings' => 'regeleinden',
-        'endings_statement' => ':count regels eindigen op een carriage return, die een shell aan het einde van elke waarde behoudt',
+        'endings_statement' => 'één regel eindigt op een carriage return, die een shell aan het einde van de waarde behoudt|:count regels eindigen op een carriage return, die een shell aan het einde van elke waarde behoudt',
         'whitespace' => 'de waarde eindigt op witruimte, die een tool behoudt die de regel letterlijk neemt, zoals --env-file van Docker',
     ],
 
@@ -302,6 +302,13 @@ return [
         'off' => 'OPcache staat uit',
         'timestamps' => 'elk request controleert de bestanden op wijzigingen. Zet het uit en laad PHP bij elke deploy opnieuw.',
         'command_line' => 'Niet gecontroleerd: de opdrachtregel heeft eigen OPcache-instellingen. De controle antwoordt in een webrequest, zoals het endpoint van laravel-health met verse resultaten.',
+    ],
+
+    'exception-arguments' => [
+        'label' => 'Argumenten in traces van exceptions',
+        'pass' => 'De traces van exceptions bewaren geen argumenten.',
+        'fail' => 'De traces van exceptions bewaren de argumenten van elke aanroep.',
+        'finding' => 'Laravel schrijft de trace van elke gemelde exception naar het log, en een kort geheim staat daar volledig in. Zet zend.exception_ignore_args = On in de php.ini van de opdrachtregel en van PHP-FPM, en laad PHP opnieuw.',
     ],
 
 ];

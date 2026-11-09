@@ -137,6 +137,17 @@ abstract class PreflightCheck extends Check
     }
 
     /**
+     * A line of this package's translations with a form for one and a form for several, the one the
+     * application's locale takes for a count. The count is offered to the line as `:count`.
+     *
+     * @param  array<string, string|int>  $replace
+     */
+    protected function messageChoice(string $key, int $count, array $replace = []): string
+    {
+        return $this->app->make(Translator::class)->choice('production-preflight::messages.'.$key, $count, ['count' => $count, ...$replace]);
+    }
+
+    /**
      * The stage the application declares in `app.env`.
      */
     protected function stage(): Stage

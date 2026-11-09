@@ -84,7 +84,7 @@ return [
         'mark' => 'marque d’ordre des octets',
         'mark_statement' => 'le fichier commence par une, et un shell qui charge le fichier la prend pour une partie du premier nom',
         'endings' => 'fins de ligne',
-        'endings_statement' => ':count lignes se terminent par un retour chariot, qu’un shell conserve à la fin de chaque valeur',
+        'endings_statement' => 'une ligne se termine par un retour chariot, qu’un shell conserve à la fin de sa valeur|:count lignes se terminent par un retour chariot, qu’un shell conserve à la fin de chaque valeur',
         'whitespace' => 'la valeur se termine par des espaces, qu’un outil qui prend la ligne à la lettre conserve, comme --env-file de Docker',
     ],
 
@@ -302,6 +302,13 @@ return [
         'off' => 'OPcache est désactivé',
         'timestamps' => 'chaque requête vérifie si les fichiers ont changé. Désactivez-le et rechargez PHP à chaque déploiement.',
         'command_line' => 'Non vérifié : la ligne de commande a ses propres réglages OPcache. La vérification répond dans une requête web, comme le point d’accès de laravel-health avec des résultats frais.',
+    ],
+
+    'exception-arguments' => [
+        'label' => 'Arguments dans les traces d’exceptions',
+        'pass' => 'Les traces des exceptions ne gardent aucun argument.',
+        'fail' => 'Les traces des exceptions gardent les arguments de chaque appel.',
+        'finding' => 'Laravel journalise la trace de chaque exception signalée, et un secret court y figure en entier. Réglez zend.exception_ignore_args = On dans le php.ini de la ligne de commande et de PHP-FPM, puis rechargez PHP.',
     ],
 
 ];

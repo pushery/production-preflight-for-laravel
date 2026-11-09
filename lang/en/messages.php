@@ -84,7 +84,7 @@ return [
         'mark' => 'byte order mark',
         'mark_statement' => 'the file starts with one, and a shell that sources the file reads it as part of the first name',
         'endings' => 'line endings',
-        'endings_statement' => ':count lines end in a carriage return, which a shell keeps at the end of each value',
+        'endings_statement' => 'one line ends in a carriage return, which a shell keeps at the end of its value|:count lines end in a carriage return, which a shell keeps at the end of each value',
         'whitespace' => 'the value ends in whitespace, which a tool that takes the line literally, such as Docker\'s --env-file, keeps',
     ],
 
@@ -302,6 +302,13 @@ return [
         'off' => 'OPcache is switched off',
         'timestamps' => 'every request checks the files for changes. Switch it off and reload PHP on each deploy.',
         'command_line' => 'Not checked: the command line has OPcache settings of its own. The check answers in a web request, such as laravel-health\'s endpoint with fresh results.',
+    ],
+
+    'exception-arguments' => [
+        'label' => 'Arguments in exception traces',
+        'pass' => 'The traces of exceptions keep no arguments.',
+        'fail' => 'The traces of exceptions keep the arguments of every call.',
+        'finding' => 'Laravel logs the trace of every reported exception, and a short secret stands there whole. Set zend.exception_ignore_args = On in the php.ini of the command line and of PHP-FPM, and reload PHP.',
     ],
 
 ];

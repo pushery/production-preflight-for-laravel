@@ -84,7 +84,7 @@ return [
         'mark' => 'Byte-Order-Mark',
         'mark_statement' => 'die Datei beginnt mit einer, und eine Shell, die die Datei einliest, hält sie für einen Teil des ersten Namens',
         'endings' => 'Zeilenenden',
-        'endings_statement' => ':count Zeilen enden mit einem Wagenrücklauf, den eine Shell am Ende jedes Werts behält',
+        'endings_statement' => 'eine Zeile endet mit einem Wagenrücklauf, den eine Shell am Ende ihres Werts behält|:count Zeilen enden mit einem Wagenrücklauf, den eine Shell am Ende jedes Werts behält',
         'whitespace' => 'der Wert endet mit Leerraum, den ein Werkzeug behält, das die Zeile wörtlich nimmt, etwa Dockers --env-file',
     ],
 
@@ -302,6 +302,13 @@ return [
         'off' => 'OPcache ist ausgeschaltet',
         'timestamps' => 'jeder Request prüft die Dateien auf Änderungen. Ausschalten und PHP bei jedem Deploy neu laden.',
         'command_line' => 'Nicht geprüft: Die Kommandozeile hat eigene OPcache-Einstellungen. Die Prüfung antwortet in einem Web-Request, etwa am Endpunkt von laravel-health mit frischen Ergebnissen.',
+    ],
+
+    'exception-arguments' => [
+        'label' => 'Argumente in Traces von Exceptions',
+        'pass' => 'Die Traces von Exceptions halten keine Argumente fest.',
+        'fail' => 'Die Traces von Exceptions halten die Argumente jedes Aufrufs fest.',
+        'finding' => 'Laravel schreibt den Trace jeder gemeldeten Exception ins Log, und ein kurzes Geheimnis steht dort ganz. zend.exception_ignore_args = On in der php.ini der Kommandozeile und von PHP-FPM setzen und PHP neu laden.',
     ],
 
 ];

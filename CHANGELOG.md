@@ -4,6 +4,16 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.5.0] - 2026-11-09
+
+### ✨ Added
+
+- **`exception-arguments` fails a production or staging server whose PHP keeps the arguments of every call in the trace of an exception.** With `zend.exception_ignore_args` off, as `php.ini-development` ships it, Laravel logs the trace of every reported exception with each argument in it, and PHP shortens a string there to 15 characters, so a PIN or a short code stands in the log whole wherever its parameter lacks `#[\SensitiveParameter]`. The check reads the setting of the process it runs in, and its finding names the php.ini of the command line and of PHP-FPM. **Upgrade:** a server built from `php.ini-production` passes. One that fails sets `zend.exception_ignore_args = On` in both and reloads PHP.
+
+### 🐛 Fixed
+
+- **`env-bytes` words a single carriage return in the singular.** A `.env` with one line ending in a carriage return was reported as "1 lines end in a carriage return", and the same held in every language the package ships. The finding now reads "one line ends in a carriage return", and from two lines on it counts them as before.
+
 ## [0.4.0] - 2026-11-07
 
 ### 🐛 Fixed
@@ -43,7 +53,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.1.0...v0.2.0
