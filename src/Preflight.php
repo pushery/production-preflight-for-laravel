@@ -25,6 +25,7 @@ use Pushery\ProductionPreflight\Checks\Host\ConfigCacheFreshnessCheck;
 use Pushery\ProductionPreflight\Checks\Host\DevDependenciesCheck;
 use Pushery\ProductionPreflight\Checks\Host\EnvExposureCheck;
 use Pushery\ProductionPreflight\Checks\Host\EnvOverHttpCheck;
+use Pushery\ProductionPreflight\Checks\Host\ExceptionArgumentsCheck;
 use Pushery\ProductionPreflight\Checks\Host\OpcacheCheck;
 use Pushery\ProductionPreflight\Checks\Host\OptimizedAutoloaderCheck;
 use Pushery\ProductionPreflight\Checks\Host\PendingMigrationsCheck;
@@ -74,6 +75,7 @@ final class Preflight
         OptimizedAutoloaderCheck::class,
         PhpVersionParityCheck::class,
         OpcacheCheck::class,
+        ExceptionArgumentsCheck::class,
     ];
 
     /**

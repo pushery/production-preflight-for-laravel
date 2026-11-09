@@ -23,8 +23,7 @@ Laravel production checks for what passes every test: unsafe settings, a .env th
 
 **Full documentation at
 [docs.pushery.com/production-preflight-for-laravel](https://docs.pushery.com/production-preflight-for-laravel/).**
-This README is the quick start; the guides, the configuration reference and the
-upgrade notes live there.
+This README is the quick start; the guides and the configuration reference live there.
 
 ## Requirements
 
@@ -75,7 +74,7 @@ Lint a `.env` file on its own, in a pipeline or on a schedule:
 php artisan env:lint .env.production
 ```
 
-Twenty-seven checks cover the `.env` file (keys set twice, keys missing against the example, placeholders, a cut-off `#`), the configuration (debug mode, the application key, mail that goes nowhere, test-mode payment keys, queue, session and cache drivers) and the installation (a stale configuration cache, workers that missed `queue:restart`, pending migrations, exposed secrets). No check passes when it could not look, and no value of the application reaches a log, a notification or a stored result. The [documentation](https://docs.pushery.com/production-preflight-for-laravel/) lists every check and its verdict.
+Twenty-eight checks cover the `.env` file (keys set twice, keys missing against the example, placeholders, a cut-off `#`), the configuration (debug mode, the application key, mail that goes nowhere, test-mode payment keys, queue, session and cache drivers) and the installation (a stale configuration cache, workers that missed `queue:restart`, pending migrations, exposed secrets, arguments kept in the traces of exceptions). No check passes when it could not look, and no value of the application reaches a log, a notification or a stored result. The [documentation](https://docs.pushery.com/production-preflight-for-laravel/) lists every check and its verdict.
 
 ## Configuration
 
