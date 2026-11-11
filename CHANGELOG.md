@@ -4,6 +4,12 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.6.0] - 2026-11-11
+
+### 🔧 Changed
+
+- **The switch reads its rule from the package, so a fix to it reaches a published config.** `config/production-preflight.php` spelled out how a value of the `.env` turns it on or off, and a host that published the file kept that rule as it was on the day it published it, so a later fix to the rule, such as the one for an empty `.env` line, never reached the copy. The config calls `EnvSwitch::read()` now, and the rule ships in `src/Support/EnvSwitch.php`: `false`, `0`, `no` and `off` switch off, `true`, `1`, `yes` and `on` switch on, trimmed and in any case, and anything else keeps the value the package ships. **Upgrade:** in a published copy, replace the expression of it once with its call and import the class: `http_probe.enabled` with `EnvSwitch::read(env('PRODUCTION_PREFLIGHT_HTTP_PROBE'), false)`, and `use Pushery\ProductionPreflight\Support\EnvSwitch;` at the top.
+
 ## [0.5.0] - 2026-11-09
 
 ### ✨ Added
@@ -53,7 +59,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.2.0...v0.3.0
