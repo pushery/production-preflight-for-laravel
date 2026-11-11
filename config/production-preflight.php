@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Pushery\ProductionPreflight\Support\EnvSwitch;
+
 return [
 
     /*
@@ -92,11 +94,7 @@ return [
     | is held to at least 1, and a value that is no such number keeps the 5 shipped here.
     */
     'http_probe' => [
-        'enabled' => in_array(
-            is_string($probe = env('PRODUCTION_PREFLIGHT_HTTP_PROBE')) ? strtolower(trim($probe)) : $probe,
-            [true, '1', 'true', 'yes', 'on'],
-            true,
-        ),
+        'enabled' => EnvSwitch::read(env('PRODUCTION_PREFLIGHT_HTTP_PROBE'), false),
         'timeout' => is_numeric($probeTimeout = env('PRODUCTION_PREFLIGHT_HTTP_PROBE_TIMEOUT')) && (int) $probeTimeout >= 1
             ? (int) $probeTimeout
             : 5,
