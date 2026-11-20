@@ -37,6 +37,9 @@ final class PlaceholderValuesCheck extends PreflightCheck
     /**
      * The names that hold a credential unless the configuration says otherwise. A `VITE_` key is left
      * out: Vite compiles it into the JavaScript every visitor loads, so it is public by design.
+     *
+     * It is matched against the keys of a parsed file, and EnvFile splits the file at every line
+     * break before it reads a key, so a key never ends in a line feed for `$` to stop before.
      */
     public const string SECRET_KEYS = '/^(?!VITE_)(?:.*_)?(?:KEY|SECRET|PASSWORD|TOKEN)$/i';
 
@@ -70,6 +73,7 @@ final class PlaceholderValuesCheck extends PreflightCheck
         }
 
         $example = EnvFile::read($this->examplePath());
+        $secretKeys = $this->secretKeys();
         $findings = [];
         $evidence = [];
 
@@ -78,7 +82,7 @@ final class PlaceholderValuesCheck extends PreflightCheck
             $reason = match (true) {
                 $value === '' => null,
                 $this->isPlaceholder($value) => 'placeholder-values.placeholder',
-                $example instanceof EnvFile && $this->isSecret($key) && ! $this->isLiteral($value) && ! $this->isReference($value) && $example->last($key)?->value() === $value => 'placeholder-values.from_example',
+                $example instanceof EnvFile && preg_match($secretKeys, $key) === 1 && ! $this->isLiteral($value) && ! $this->isReference($value) && $example->last($key)?->value() === $value => 'placeholder-values.from_example',
                 default => null,
             };
 
@@ -124,13 +128,30 @@ final class PlaceholderValuesCheck extends PreflightCheck
     }
 
     /**
-     * Whether a key's name says it holds a credential, by `production-preflight.placeholders.secret_keys`.
+     * The pattern a key's name has to match to count as a credential:
+     * `production-preflight.placeholders.secret_keys` where it is a pattern PHP compiles, and the
+     * shipped one where it is not. A pattern with a typo, or a setting that is no text, matches no
+     * key at all, and a secret copied from the example file would then pass unseen.
      */
-    private function isSecret(string $key): bool
+    private function secretKeys(): string
     {
-        $pattern = $this->config('production-preflight.placeholders.secret_keys', self::SECRET_KEYS);
+        $pattern = $this->config('production-preflight.placeholders.secret_keys');
 
-        return is_string($pattern) && @preg_match($pattern, $key) === 1;
+        if (! is_string($pattern)) {
+            return self::SECRET_KEYS;
+        }
+
+        // A pattern that does not compile is a warning in PHP, and a framework turns it into an
+        // exception. Here it is an answer: the setting is no pattern.
+        set_error_handler(static fn (): bool => true);
+
+        try {
+            $compiles = preg_match($pattern, '') !== false;
+        } finally {
+            restore_error_handler();
+        }
+
+        return $compiles ? $pattern : self::SECRET_KEYS;
     }
 
     /**
@@ -146,6 +167,9 @@ final class PlaceholderValuesCheck extends PreflightCheck
     /**
      * Whether a value only refers to other keys, one `${NAME}` after another and nothing else. Laravel's
      * example file sets `VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"`, and a server keeps the line as it is.
+     *
+     * The value comes from a single line of the file, which EnvFile splits at every line break, so it
+     * holds no line feed for `$` to stop before.
      */
     private function isReference(string $value): bool
     {

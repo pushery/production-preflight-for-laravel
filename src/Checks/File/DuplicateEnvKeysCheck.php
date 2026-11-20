@@ -16,20 +16,19 @@ use Pushery\ProductionPreflight\Scope;
 /**
  * A key the `.env` sets on more than one line.
  *
- * It is valid syntax, it raises no warning, and which line wins stands nowhere. Measured on the
- * production code path: the LAST one does. phpdotenv lets a later line of the same file overwrite an
- * earlier one and protects only what the real environment held before loading, so the first line has
- * no effect, and nobody sees whether it was the one that was meant. The report says so, because
- * whoever stands in front of the finding on a server looks nothing up.
+ * It is valid syntax, it raises no warning, and which line wins stands nowhere. phpdotenv applies the
+ * last line that sets a key: a later line of the same file overwrites an earlier one, and only what
+ * the real environment held before loading is protected, so the first line has no effect, and nobody
+ * sees whether it was the one that was meant. The report says so, because whoever stands in front of
+ * the finding on a server looks nothing up.
  *
  * Two lines with equal values are untidiness and warn; two with different values mean a setting
  * stands in the file and does not apply, and fail. A check that said both alike would be switched off
  * for the frequent harmless case, and then be gone for the rare expensive one.
  *
- * The finding names the key, the lines and the verdict, never a value: it goes to every channel
- * laravel-health feeds. The values go to the console alone, as evidence. The rule came from a
- * scheduled run whose alert said "failed with exit code 1" 38 times without naming one key, and a
- * finding that cannot be acted on is as good as none.
+ * Every finding names its key, its lines and the verdict, because an alert that says only that a run
+ * failed cannot be acted on. It never names a value: the finding goes to every channel laravel-health
+ * feeds. The values go to the console alone, as evidence.
  */
 final class DuplicateEnvKeysCheck extends PreflightCheck
 {

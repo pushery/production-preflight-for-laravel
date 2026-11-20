@@ -74,7 +74,8 @@ return [
     | case, and an entry that ends in `*` matches every value it begins. `required` names the keys
     | that must be set and not empty. A key whose name matches `secret_keys` also fails when its
     | value is the one the committed example file carries, unless the value only refers to other
-    | keys. A `VITE_` key is left out of `secret_keys`: Vite compiles it into the page.
+    | keys. A `VITE_` key is left out of `secret_keys`: Vite compiles it into the page. A
+    | `secret_keys` that is no pattern PHP compiles keeps the shipped one.
     */
     'placeholders' => [
         'values' => [
@@ -82,7 +83,7 @@ return [
             'replaceme', 'replace-me', 'todo', 'tbd', 'xxx*', 'your-*', 'your_*', '<*',
         ],
         'required' => [],
-        'secret_keys' => '/^(?!VITE_)(?:.*_)?(?:KEY|SECRET|PASSWORD|TOKEN)$/i',
+        'secret_keys' => '/^(?!VITE_)(?:.*_)?(?:KEY|SECRET|PASSWORD|TOKEN)$/iD',
     ],
 
     /*

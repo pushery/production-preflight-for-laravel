@@ -15,10 +15,10 @@ use Pushery\ProductionPreflight\Scope;
  *
  * With `--deploy` it runs what a deploy can answer, the `.env` and the configuration, and stops the
  * deploy before harm is done: exit 1 when a check failed, 2 when a check could not look. A warning is
- * printed and lets the deploy pass. It also records the deploy, so the queue-restart check can tell
- * later whether the workers were restarted after it; so it runs before `queue:restart` in the deploy
- * script. The exit code is the assurance here, not a notification: one of the findings is a mailer
- * that delivers nothing.
+ * printed and lets the deploy pass. A deploy it lets pass is recorded, so the queue-restart check can
+ * tell later whether the workers were restarted after it; so it runs before `php artisan reload`, or
+ * `queue:restart`, in the deploy script. A deploy it stops is not recorded. The exit code is the
+ * assurance here, not a notification: one of the findings is a mailer that delivers nothing.
  *
  * Without `--deploy` it runs every check, the state of the installation included, which a person on
  * the server wants to see at once and the scheduler reaches through laravel-health.
@@ -32,7 +32,7 @@ final class PreflightCommand extends Command
      * @var string
      */
     protected $signature = 'preflight
-        {--deploy : Run the checks a deploy can answer, fail the deploy on a finding, and record it}
+        {--deploy : Run the checks a deploy can answer, fail the deploy on a finding, and record a deploy that passes}
         {--show-values : Print the values behind the findings; never in a deploy, whose output is kept}';
 
     /**
@@ -52,12 +52,15 @@ final class PreflightCommand extends Command
             return 2;
         }
 
-        if ($deploy && ! DeployRecord::write($this->laravel, $this->currentTime())) {
-            $this->warn($this->text('command.unrecorded', ['path' => DeployRecord::path($this->laravel)]));
-        }
-
         $done = $this->inspect($deploy ? Preflight::checks(Scope::File, Scope::Configuration) : Preflight::checks());
         $exitCode = $this->exitCode($done, false);
+
+        // A deploy this run stops never reaches `reload` or `queue:restart`, and on a zero-downtime
+        // deploy the release before it keeps serving, its workers with it. A record of it would make
+        // the queue-restart check report those workers as running old code until a deploy passed.
+        if ($deploy && $exitCode === 0 && ! DeployRecord::write($this->laravel, $this->currentTime())) {
+            $this->warn($this->text('command.unrecorded', ['path' => DeployRecord::path($this->laravel)]));
+        }
 
         foreach ($done as $entry) {
             $this->report($entry['check'], $entry['inspection'], $values);

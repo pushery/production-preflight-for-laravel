@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pushery\ProductionPreflight\Checks\Configuration;
 
+use Illuminate\Support\ConfigurationUrlParser;
+use InvalidArgumentException;
 use Override;
 use Pushery\ProductionPreflight\Checks\ProductionCheck;
 use Pushery\ProductionPreflight\Finding;
@@ -25,6 +27,11 @@ use Pushery\ProductionPreflight\Verdict;
  * A `failover` mailer sends through its first mailer and moves on only when that one fails, which
  * `log` never does, so the first mailer decides. A `roundrobin` mailer spreads the messages over all
  * of its mailers, so any dead end swallows a share of them.
+ *
+ * A mailer is read the way Laravel's mail manager reads it: a `url`, which the shipped configuration
+ * fills from `MAIL_URL`, lays its host, port and credentials over the settings beside it, and its
+ * scheme becomes the transport. A URL that names no transport, an empty one included, leaves Laravel
+ * none to send with, so it fails.
  *
  * This is the one finding the operating mode cannot deliver by itself: laravel-health notifies by
  * mail unless told otherwise. The deploy command is where it is caught, and the
@@ -105,6 +112,12 @@ final class MailTransportCheck extends ProductionCheck
             return $verdict === Verdict::Fail ? [new Finding($subject, $this->message('mail-transport.unconfigured'))] : [];
         }
 
+        $mailer = $this->overlaid($mailer);
+
+        if ($mailer === null) {
+            return $verdict === Verdict::Fail ? [new Finding($subject, $this->message('mail-transport.url'))] : [];
+        }
+
         $transport = $mailer['transport'] ?? null;
         $transport = is_string($transport) ? strtolower($transport) : '';
         $members = $mailer['mailers'] ?? null;
@@ -131,6 +144,33 @@ final class MailTransportCheck extends ProductionCheck
         }
 
         return $found;
+    }
+
+    /**
+     * A mailer as Laravel's mail manager reads it: the settings its `url` carries lie over the others,
+     * and the scheme of the URL is the transport. Null where the mailer has a URL that names no
+     * transport: an empty one, one without a scheme, or one that cannot be read.
+     *
+     * @param  array<array-key, mixed>  $mailer
+     * @return array<array-key, mixed>|null
+     */
+    private function overlaid(array $mailer): ?array
+    {
+        $url = $mailer['url'] ?? null;
+
+        if ($url === null) {
+            return $mailer;
+        }
+
+        try {
+            $parsed = is_string($url) ? new ConfigurationUrlParser()->parseConfiguration($url) : [];
+        } catch (InvalidArgumentException) {
+            return null;
+        }
+
+        $transport = $parsed['driver'] ?? null;
+
+        return is_string($transport) ? [...$mailer, ...$parsed, 'transport' => $transport] : null;
     }
 
     /**

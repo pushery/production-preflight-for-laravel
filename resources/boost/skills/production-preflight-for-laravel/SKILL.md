@@ -42,7 +42,7 @@ The first publishes everything, the other two one group each. Every option in `c
 
 ### 3. Stop the deploy
 
-Add the command to the deploy script, which needs `set -e` to stop on it, after `composer install` and `config:cache`, and before `queue:restart`:
+Add the command to the deploy script, which needs `set -e` to stop on it, after `composer install` and `config:cache`, and before `php artisan reload` (or `queue:restart`):
 
 ```bash
 php artisan preflight --deploy
@@ -59,7 +59,19 @@ use Spatie\Health\Facades\Health;
 Health::checks(Preflight::healthChecks());
 ```
 
-laravel-health runs them with its scheduled `health:check`. `healthChecks()` leaves out a check that cannot look in the process laravel-health runs it in: `opcache` on the command line, `php-version-parity` until the web server's binary is named, `env-over-http` until the probe is switched on, and `queue-restart` until `preflight --deploy` recorded a deploy. laravel-health counts a skipped check as a failure unless `health.treat_skipped_as_failure` says otherwise, so each of them would report a correctly configured server as failing. Give it a channel besides mail, the Oh Dear endpoint or a Slack webhook in `config/health.php`: one of the findings is a mailer that delivers nothing, and that message would not arrive by mail.
+laravel-health runs them with its scheduled `health:check`. `healthChecks()` leaves out a check that cannot look in the process laravel-health runs it in: `opcache` on the command line, `php-version-parity` in a web request, and on the command line until the web server's binary is named, `env-over-http` until the probe is switched on, and `queue-restart` until `preflight --deploy` recorded a deploy. laravel-health counts a skipped check as a failure unless `health.treat_skipped_as_failure` says otherwise, so each of them would report a correctly configured server as failing. Give it a channel besides mail, the Oh Dear endpoint or a Slack webhook in `config/health.php`: one of the findings is a mailer that delivers nothing, and that message would not arrive by mail.
+
+Schedule `health:check` together with the pruning of the results laravel-health keeps. Its database store, the default, keeps a row for each check on every run, and only a `model:prune` that names the model deletes them, after `keep_history_for_days` in `config/health.php`: without `--model`, `model:prune` looks for models in `app/Models` alone.
+
+```php
+// routes/console.php
+use Illuminate\Support\Facades\Schedule;
+use Spatie\Health\Commands\RunHealthChecksCommand;
+use Spatie\Health\Models\HealthCheckResultHistoryItem;
+
+Schedule::command(RunHealthChecksCommand::class)->everyMinute();
+Schedule::command('model:prune', ['--model' => [HealthCheckResultHistoryItem::class]])->daily();
+```
 
 ### 5. Lint a `.env`
 
@@ -69,7 +81,7 @@ php artisan env:lint .env.production
 php artisan env:lint --quiet-when-clean
 ```
 
-It exits with 1 on any finding, warnings included, and with 2 when the file cannot be read.
+It exits with 1 on any finding, warnings included. Without a finding it exits with 2 when a check could not look: the file or the example file cannot be read, or the stage, read from the file's `APP_ENV`, is a name on none of the `stages` lists.
 
 ## Examples
 
@@ -98,7 +110,8 @@ Acknowledging a choice:
 ## Anti-Patterns
 
 - Running `preflight --deploy` without `set -e` in the script: the finding is printed and the deploy carries on. Put `set -e` at the top.
-- Running it after `queue:restart`: the deploy is then recorded after the restart signal, and the `queue-restart` check reports workers on old code. Run it before.
+- Running it after `php artisan reload` or `queue:restart`: both write the restart signal, the deploy is then recorded after it, and the `queue-restart` check reports workers on old code. Run it before either.
+- Clearing the cache with `cache:clear` or `optimize:clear` after `php artisan reload` or `queue:restart`: it empties the restart signal with the cache, and the `queue-restart` check can no longer tell whether the workers restarted. Clear it before either.
 - Running it before `config:cache` on a server with a cached configuration: the checks judge the configuration of the previous deploy. Cache first.
 - Passing `--show-values` to a command a deploy tool or a scheduler runs: its output is kept, and `preflight --deploy` refuses the option for that reason. Use it on the server's terminal only.
 - Treating exit code 2 as success: it means a check could not look. Make it look, or acknowledge it with the reason.

@@ -34,6 +34,7 @@ enum Stage: string
     /**
      * The stage a name declares, compared without case and surrounding whitespace.
      *
+     * @param  mixed  $name  the stage name as the configuration or the environment gives it, which need not be a string
      * @param  mixed  $configured  the `production-preflight.stages` setting; a stage it does not
      *                             map keeps the names of NAMES
      */

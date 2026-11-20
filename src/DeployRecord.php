@@ -39,6 +39,7 @@ final class DeployRecord
         $path = self::path($app);
         $content = is_file($path) ? file_get_contents($path) : false;
 
+        // The content is trimmed before the match, so `$` has no line feed at the end to stop before.
         return is_string($content) && preg_match('/^\d+$/', trim($content)) === 1 ? (int) trim($content) : null;
     }
 }

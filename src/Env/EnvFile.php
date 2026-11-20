@@ -184,6 +184,8 @@ final readonly class EnvFile
 
         $key = rtrim(substr($trimmed, 0, $separator));
 
+        // The line comes from a split at every line break and the key is trimmed on its right, so
+        // `$` has no line feed at the end to stop before.
         if (preg_match('/^[A-Za-z_][\w.]*$/', $key) !== 1) {
             return null;
         }

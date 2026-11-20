@@ -18,30 +18,34 @@ use Throwable;
  * The command line on another PHP version than the web server: migrations and scheduled commands
  * then run under a different version than the application they serve.
  *
- * The check runs on the command line, so it knows that side. The web server's side is a binary it
- * runs with `-v`, the one `production-preflight.php.fpm` names, compared by minor version. Without a
- * named binary, or on a host that switched off `proc_open`, it says it could not look: a missing
- * function is not a matching version.
+ * The command line's side is the PHP the check runs in, so the check answers on the command line,
+ * laravel-health's scheduled run for one. In a web request that PHP is the web server's own, which
+ * would be compared with itself, so there it says it could not look. The web server's side is a
+ * binary it runs with `-v`, the one `production-preflight.php.fpm` names, compared by minor version.
+ * Without a named binary, or on a host that switched off `proc_open`, it says it could not look: a
+ * missing function is not a matching version.
  */
 final class PhpVersionParityCheck extends ProductionCheck
 {
     /**
      * @param  bool|null  $processes  whether processes may be started; null asks the host
+     * @param  string  $sapi  the server API the check runs under
      */
-    public function __construct(Application $app, private readonly ?bool $processes = null)
+    public function __construct(Application $app, private readonly ?bool $processes = null, private readonly string $sapi = PHP_SAPI)
     {
         parent::__construct($app);
     }
 
     /**
-     * Without the web server's binary named there is no second version to compare.
+     * In a web request the PHP the check runs in is the web server's own, and without the web server's
+     * binary named there is no second version to compare.
      */
     #[Override]
     public function canLookHere(): bool
     {
         $binary = $this->config('production-preflight.php.fpm');
 
-        return is_string($binary) && trim($binary) !== '';
+        return $this->onCommandLine() && is_string($binary) && trim($binary) !== '';
     }
 
     #[Override]
@@ -59,6 +63,10 @@ final class PhpVersionParityCheck extends ProductionCheck
     #[Override]
     protected function inspectProduction(): Inspection
     {
+        if (! $this->onCommandLine()) {
+            return Inspection::undetermined($this->message('php-version-parity.web_request'));
+        }
+
         $binary = $this->config('production-preflight.php.fpm');
 
         if (! is_string($binary) || trim($binary) === '') {
@@ -85,6 +93,14 @@ final class PhpVersionParityCheck extends ProductionCheck
                 [new Finding('production-preflight.php.fpm', $this->message('php-version-parity.finding', $replace))],
                 [new Evidence('production-preflight.php.fpm', $binary)],
             );
+    }
+
+    /**
+     * Whether the check runs on the command line, where the PHP it runs in is the command line's.
+     */
+    private function onCommandLine(): bool
+    {
+        return $this->sapi === 'cli' || $this->sapi === 'phpdbg';
     }
 
     /**
