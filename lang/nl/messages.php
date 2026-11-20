@@ -90,11 +90,11 @@ return [
 
     'development-stage-server' => [
         'label' => 'Ontwikkelomgeving op een server',
-        'pass' => 'De applicatie wordt geserveerd op :host, een machine voor ontwikkeling.',
+        'pass' => 'app.url noemt een host waaronder een machine voor ontwikkeling wordt geserveerd.',
         'not_development' => 'Niets te controleren: alleen een ontwikkelomgeving wordt tegen haar host gelezen, en de applicatie geeft de omgeving :stage op.',
         'no_host' => 'app.url noemt geen host, dus valt niet te beoordelen of een server een ontwikkelomgeving opgeeft.',
-        'fail' => 'APP_ENV is :env en app.url noemt :host: een server die een ontwikkelomgeving opgeeft, waarop elke productiecontrole slaagt.',
-        'finding' => ':host is geen host waaronder een machine voor ontwikkeling wordt geserveerd, dus APP_ENV draagt waarschijnlijk nog de waarde uit .env.example',
+        'fail' => 'APP_ENV noemt een ontwikkelomgeving en app.url een host waaronder geen machine voor ontwikkeling wordt geserveerd: een server die een ontwikkelomgeving opgeeft, waarop elke productiecontrole slaagt.',
+        'finding' => 'noemt geen host waaronder een machine voor ontwikkeling wordt geserveerd, dus APP_ENV draagt waarschijnlijk nog de waarde uit .env.example',
     ],
 
     'app-debug' => [
@@ -106,11 +106,13 @@ return [
 
     'app-key' => [
         'label' => 'Applicatiesleutel',
-        'pass' => 'De applicatiesleutel is gezet, en is geen plaatshouder en niet die van het voorbeeldbestand.',
-        'fail' => 'De applicatiesleutel ontbreekt of is bekend bij anderen, dus sessies, cookies en versleutelde gegevens kunnen worden vervalst.',
+        'pass' => 'De applicatiesleutel is gezet, en noch hij noch een eerdere sleutel is een plaatshouder of een sleutel uit het voorbeeldbestand.',
+        'fail' => 'De applicatiesleutel ontbreekt, of een sleutel die de applicatie accepteert is bekend bij anderen, dus sessies, cookies, versleutelde gegevens en ondertekende URL’s kunnen worden vervalst.',
         'missing' => 'er is geen sleutel gezet',
         'placeholder' => 'de sleutel is een plaatshouder die een oude Laravel-versie in het voorbeeldbestand meeleverde',
         'committed' => 'de sleutel is die uit het ingecheckte voorbeeldbestand',
+        'previous_placeholder' => 'de eerdere sleutel op positie :position is een plaatshouder die een oude Laravel-versie in het voorbeeldbestand meeleverde, en de applicatie accepteert nog steeds cookies, versleutelde gegevens en ondertekende URL’s die ermee zijn gemaakt',
+        'previous_committed' => 'de eerdere sleutel op positie :position is er een uit het ingecheckte voorbeeldbestand, en de applicatie accepteert nog steeds cookies, versleutelde gegevens en ondertekende URL’s die ermee zijn gemaakt',
     ],
 
     'mail-transport' => [
@@ -119,6 +121,7 @@ return [
         'fail' => 'De standaardmailer bezorgt geen enkele mail: registraties, wachtwoordresets en facturen verdwijnen geruisloos.',
         'warn' => 'De standaardmailer verstuurt naar deze machine zelf. Een relay daar moet de mail doorsturen.',
         'unconfigured' => 'de mailer is niet geconfigureerd, dus versturen geeft een fout',
+        'url' => 'de URL van de mailer noemt geen transport dat Laravel kan lezen, dus versturen geeft een fout',
         'log' => 'het transport log schrijft elk bericht in het log en verstuurt er geen',
         'array' => 'het transport array houdt elk bericht in het geheugen en verstuurt er geen',
         'catcher' => 'de SMTP-host is een mailcatcher, waar berichten stoppen en geen postvak ze ontvangt',
@@ -129,11 +132,14 @@ return [
         'label' => 'Een tweede weg voor meldingen',
         'pass' => 'Een mislukte controle bereikt je via een kanaal naast mail.',
         'pulled' => 'Oh Dear haalt de resultaten op, los van de mail van de applicatie.',
-        'pulled_own' => 'Een monitor haalt de resultaten op bij :endpoint, los van de mail van de applicatie.',
+        'pulled_own' => 'Een monitor haalt de resultaten op bij het endpoint dat production-preflight.health_endpoint noemt, los van de mail van de applicatie.',
         'warn' => 'Een mislukte controle in bedrijf zou je niet bereiken als de mail uitvalt.',
         'off' => 'meldingen staan uit, en niets haalt de resultaten op',
         'mail_only' => 'een mislukte controle wordt alleen per mail bezorgd, en als de mail uitvalt, is juist het bericht daarover het bericht dat niet aankomt. Voeg een Slack-webhook of het Oh Dear-endpoint toe, of noem in production-preflight.health_endpoint een eigen endpoint dat een monitor ophaalt.',
         'none' => 'geen kanaal bezorgt een mislukte controle',
+        'unserved' => 'Oh Dear staat aan, en laravel-health biedt het geen endpoint om de resultaten bij op te halen.',
+        'unserved_secret' => 'laravel-health biedt het Oh Dear-endpoint alleen aan met een secret, en er is er geen ingesteld, dus Oh Dear vindt niets om op te halen. Zet OH_DEAR_HEALTH_CHECK_SECRET op het secret dat Oh Dear in zijn Application Health-instellingen toont.',
+        'unserved_url' => 'laravel-health biedt het Oh Dear-endpoint alleen aan onder een url, en er is er geen ingesteld, dus Oh Dear vindt niets om op te halen. Zet die op het pad dat Oh Dear opvraagt, standaard /oh-dear-health-check-results.',
     ],
 
     'test-mode-keys' => [
@@ -154,12 +160,16 @@ return [
         'unconfigured' => 'de standaardverbinding is niet geconfigureerd, dus een job in de queue zetten geeft een fout',
         'null' => 'de driver null gooit elke job weg die hij krijgt',
         'sync' => 'jobs draaien binnen het request dat ze in de queue zet, dus elk antwoord wacht erop. Een keuze voor een kleine installatie: accepteer hem als het de jouwe is.',
+        'unattended' => 'De standaard-queueverbinding voert elke job uit zonder worker.',
+        'deferred' => 'de driver deferred voert elke job uit in het PHP-proces dat hem in de queue zette, nadat het antwoord is verstuurd: een mislukte job wordt niet opnieuw geprobeerd, en een job die niet klaar is gaat verloren als dat proces stopt. Een keuze voor een kleine installatie: accepteer hem als het de jouwe is.',
+        'background' => 'de driver background voert elke job uit in een PHP-proces dat ervoor wordt gestart: een mislukte job wordt niet opnieuw geprobeerd, en een job die niet klaar is gaat verloren als dat proces stopt. Een keuze voor een kleine installatie: accepteer hem als het de jouwe is.',
     ],
 
     'session-driver' => [
         'label' => 'Sessiedriver',
         'pass' => 'Sessies overleven het request.',
-        'fail' => 'Sessies duren één request.',
+        'fail' => 'Sessies overleven het request niet.',
+        'unconfigured' => 'de sessiedriver is niet geconfigureerd, dus het eerste request dat een sessie start geeft een fout',
         'array' => 'de driver array vergeet elke sessie na het request, dus elke gebruiker is na elke pagina uitgelogd',
     ],
 
@@ -169,6 +179,10 @@ return [
         'fail' => 'De standaard-cachestore bewaart niets na het request.',
         'unconfigured' => 'de standaardstore is niet geconfigureerd, dus de eerste cachetoegang geeft een fout',
         'transient' => 'de rate limiters, de atomaire locks en het herstartsignaal van de queueworkers staan in de cache en zijn na elk request weg',
+        'fail_session' => 'De standaard-cachestore houdt de cache in de sessie van elke bezoeker.',
+        'session' => 'een throttle telt per bezoeker en begint opnieuw voor een client zonder cookie, Cache::lock() en een unieke job eindigen in een fout omdat de sessiestore geen locks kent, en een command, ook queue:restart, schrijft in een sessie die niemand opslaat, zodat geen worker het herstartsignaal hoort',
+        'warn' => 'De standaard-cachestore valt terug op een store die niets na het request bewaart of de cache per bezoeker houdt.',
+        'falls_back' => 'zodra de stores ervoor uitvallen, serveert de failover-store uit een store die niets na het request bewaart of de cache in de sessie van elke bezoeker houdt, en de rate limiters, de atomaire locks en het herstartsignaal van de queueworkers gaan verloren zolang dat duurt',
     ],
 
     'secure-cookie' => [
@@ -212,15 +226,17 @@ return [
         'label' => 'Queueworkers na de deploy',
         'pass' => 'De queueworkers zijn na de laatste deploy gevraagd te herstarten.',
         'fail' => 'De queueworkers draaien de code van voor de laatste deploy.',
-        'never' => 'er is nooit een herstartsignaal verstuurd, dus de workers draaien de code waarmee ze zijn gestart. Zet php artisan queue:restart aan het einde van het deployscript.',
-        'stale' => 'het laatste herstartsignaal is ouder dan de laatste deploy. Zet php artisan queue:restart aan het einde van het deployscript.',
+        'fail_missing' => 'De queueworkers draaien mogelijk de code van voor de laatste deploy: er staat geen herstartsignaal in de cachestore.',
+        'missing' => 'ofwel liep queue:restart niet na de deploy, ofwel is de cache het signaal sindsdien kwijtgeraakt, geleegd door cache:clear of optimize:clear, zonder persistentie herstart of verdrongen, en dan zijn de workers herstart toen het verdween. Zet php artisan reload of php artisan queue:restart aan het einde van het deployscript, na php artisan preflight --deploy en na elke cache:clear of optimize:clear.',
+        'stale' => 'het laatste herstartsignaal is ouder dan de laatste deploy. Zet php artisan reload of php artisan queue:restart aan het einde van het deployscript, na php artisan preflight --deploy.',
         'no_worker' => 'De standaard-queueverbinding heeft geen worker om te herstarten.',
-        'no_deploy' => 'Niet gecontroleerd: er is geen deploy vastgelegd. Zet php artisan preflight --deploy in het deployscript, vóór php artisan queue:restart.',
+        'no_deploy' => 'Niet gecontroleerd: er is geen deploy vastgelegd. Zet php artisan preflight --deploy in het deployscript, vóór php artisan reload of php artisan queue:restart.',
     ],
 
     'pending-migrations' => [
         'label' => 'Openstaande migraties',
         'pass' => 'Elke migratie is uitgevoerd.',
+        'pass_skipped' => 'Elke migratie is uitgevoerd, behalve :migrations, die de applicatie overslaat.',
         'fail' => 'Migraties die niet zijn uitgevoerd: :count. De code is nieuw, het schema niet.',
         'pending' => 'is niet uitgevoerd',
         'no_migrator' => 'Niet gecontroleerd: de applicatie heeft geen migrator.',
@@ -232,6 +248,7 @@ return [
         'fail' => 'Paden waarin Laravel op :server niet kan schrijven, gevraagd als :user: :count. De eerste gebruikersactie die schrijft, mislukt.',
         'fail_unknown_user' => 'Paden waarin Laravel op :server niet kan schrijven: :count. De gebruiker waarmee deze controle draait, kon niet worden genoemd. De eerste gebruikersactie die schrijft, mislukt.',
         'missing' => 'de map ontbreekt',
+        'not_creatable' => 'de map ontbreekt, en de map erboven is niet schrijfbaar voor de gebruiker die deze controle uitvoert, dus Laravel kan hem niet aanmaken',
         'read_only' => 'de map is niet schrijfbaar voor de gebruiker die deze controle uitvoert',
         'log_read_only' => 'het nieuwste logbestand is niet schrijfbaar voor de gebruiker die deze controle uitvoert, en een regel die hij logt gaat verloren',
         'log_directory_read_only' => 'de map van het nieuwste logbestand is niet schrijfbaar voor de gebruiker die deze controle uitvoert, en het bestand van de volgende dag kan niet worden aangemaakt',
@@ -265,6 +282,8 @@ return [
         'off' => 'Niet gecontroleerd: of de site .env uitlevert, vraagt een request aan de site, en de probe staat uit. Zet hem aan met PRODUCTION_PREFLIGHT_HTTP_PROBE=true.',
         'no_url' => 'Niet gecontroleerd: app.url is geen http- of https-adres om op te vragen.',
         'unanswered' => 'Niet gecontroleerd: de site gaf geen antwoord.',
+        'redirected' => 'Niet gecontroleerd: de site stuurt het request door naar een ander adres, en de probe volgt geen enkele doorverwijzing. Zet in app.url het adres waarnaar hij doorverwijst.',
+        'moved' => 'doorverwezen naar :target',
     ],
 
     'dev-dependencies' => [
@@ -291,6 +310,7 @@ return [
         'unnamed' => 'Niet gecontroleerd: de PHP van de webserver is een binary die deze controle uitvoert, en er is er geen genoemd. Zet PRODUCTION_PREFLIGHT_PHP_FPM, bijvoorbeeld op /usr/sbin/php-fpm8.4.',
         'no_processes' => 'Niet gecontroleerd: deze host staat niet toe dat een proces wordt gestart.',
         'unanswered' => 'Niet gecontroleerd: de genoemde binary meldde geen PHP-versie.',
+        'web_request' => 'Niet gecontroleerd: een webrequest draait op de PHP van de webserver, die de controle met zichzelf zou vergelijken. De controle antwoordt op de opdrachtregel, zoals in de geplande run van laravel-health.',
     ],
 
     'opcache' => [
@@ -306,8 +326,10 @@ return [
 
     'exception-arguments' => [
         'label' => 'Argumenten in traces van exceptions',
-        'pass' => 'De traces van exceptions bewaren geen argumenten.',
-        'fail' => 'De traces van exceptions bewaren de argumenten van elke aanroep.',
+        'pass' => 'De traces van exceptions op de opdrachtregel bewaren geen argumenten. PHP-FPM leest een eigen php.ini en wordt beoordeeld wanneer de controle in een webrequest draait.',
+        'pass_web' => 'De traces van exceptions in de webserver bewaren geen argumenten. De opdrachtregel leest een eigen php.ini en wordt beoordeeld wanneer de controle op de opdrachtregel draait.',
+        'fail' => 'De traces van exceptions op de opdrachtregel bewaren de argumenten van elke aanroep.',
+        'fail_web' => 'De traces van exceptions in de webserver bewaren de argumenten van elke aanroep.',
         'finding' => 'Laravel schrijft de trace van elke gemelde exception naar het log, en een kort geheim staat daar volledig in. Zet zend.exception_ignore_args = On in de php.ini van de opdrachtregel en van PHP-FPM, en laad PHP opnieuw.',
     ],
 

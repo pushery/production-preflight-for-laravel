@@ -22,14 +22,15 @@ use Pushery\ProductionPreflight\Scope;
  * `#[\SensitiveParameter]`. `php.ini-production` switches the arguments off.
  *
  * The command line and PHP-FPM each read a php.ini of their own, so the check answers for the
- * process it runs in, and its finding names both.
+ * process it runs in, its summary says which of the two that is, and its finding names both.
  */
 final class ExceptionArgumentsCheck extends ProductionCheck
 {
     /**
      * @param  (Closure(string): (string|false))|null  $ini  reads a setting; null reads PHP's own
+     * @param  string  $sapi  the server API the check runs under
      */
-    public function __construct(Application $app, private readonly ?Closure $ini = null)
+    public function __construct(Application $app, private readonly ?Closure $ini = null, private readonly string $sapi = PHP_SAPI)
     {
         parent::__construct($app);
     }
@@ -50,10 +51,11 @@ final class ExceptionArgumentsCheck extends ProductionCheck
     protected function inspectProduction(): Inspection
     {
         $ignored = ($this->ini ?? ini_get(...))('zend.exception_ignore_args');
+        $commandLine = $this->sapi === 'cli' || $this->sapi === 'phpdbg';
 
         return is_string($ignored) && in_array(strtolower(trim($ignored)), ['1', 'on', 'true', 'yes'], true)
-            ? Inspection::pass($this->message('exception-arguments.pass'))
-            : Inspection::fail($this->message('exception-arguments.fail'), [
+            ? Inspection::pass($this->message($commandLine ? 'exception-arguments.pass' : 'exception-arguments.pass_web'))
+            : Inspection::fail($this->message($commandLine ? 'exception-arguments.fail' : 'exception-arguments.fail_web'), [
                 new Finding('zend.exception_ignore_args', $this->message('exception-arguments.finding')),
             ]);
     }

@@ -90,11 +90,11 @@ return [
 
     'development-stage-server' => [
         'label' => 'Development stage on a server',
-        'pass' => 'The application is served at :host, which is a machine for development.',
+        'pass' => 'app.url names a host a machine for development is served under.',
         'not_development' => 'Nothing to check: only a development stage is read against its host, and the application declares the :stage stage.',
         'no_host' => 'app.url names no host, so whether a server declares a development stage cannot be judged.',
-        'fail' => 'APP_ENV is :env and app.url names :host: a server that declares a development stage, on which every production check passes.',
-        'finding' => ':host is no host a machine for development is served under, so APP_ENV probably still holds the value of .env.example',
+        'fail' => 'APP_ENV names a development stage and app.url a host no machine for development is served under: a server that declares a development stage, on which every production check passes.',
+        'finding' => 'names no host a machine for development is served under, so APP_ENV probably still holds the value of .env.example',
     ],
 
     'app-debug' => [
@@ -106,11 +106,13 @@ return [
 
     'app-key' => [
         'label' => 'Application key',
-        'pass' => 'The application key is set, and it is neither a placeholder nor the one of the example file.',
-        'fail' => 'The application key is missing or known to others, so sessions, cookies and encrypted payloads can be forged.',
+        'pass' => 'The application key is set, and neither it nor a previous key is a placeholder or a key of the example file.',
+        'fail' => 'The application key is missing, or a key the application accepts is known to others, so sessions, cookies, encrypted payloads and signed URLs can be forged.',
         'missing' => 'no key is set',
         'placeholder' => 'the key is a placeholder an old Laravel release shipped in its example file',
         'committed' => 'the key is the one the committed example file carries',
+        'previous_placeholder' => 'previous key :position is a placeholder an old Laravel release shipped in its example file, and the application still accepts cookies, encrypted payloads and signed URLs made with it',
+        'previous_committed' => 'previous key :position is a key the committed example file carries, and the application still accepts cookies, encrypted payloads and signed URLs made with it',
     ],
 
     'mail-transport' => [
@@ -119,6 +121,7 @@ return [
         'fail' => 'The default mailer delivers no mail: registrations, password resets and invoices vanish without a sound.',
         'warn' => 'The default mailer sends to this machine. A relay there has to pass the mail on.',
         'unconfigured' => 'the mailer is not configured, so sending raises an error',
+        'url' => 'the mailer URL names no transport Laravel can read, so sending raises an error',
         'log' => 'the log transport writes every message into the log and sends none',
         'array' => 'the array transport keeps every message in memory and sends none',
         'catcher' => 'the SMTP host is a mail catcher, where messages stop and no inbox receives them',
@@ -129,11 +132,14 @@ return [
         'label' => 'A second road for alerts',
         'pass' => 'A failing check reaches you through a channel besides mail.',
         'pulled' => 'Oh Dear pulls the results, independent of the application\'s mail.',
-        'pulled_own' => 'A monitor pulls the results from :endpoint, independent of the application\'s mail.',
+        'pulled_own' => 'A monitor pulls the results from the endpoint production-preflight.health_endpoint names, independent of the application\'s mail.',
         'warn' => 'A failing check in operation would not reach you if mail broke.',
         'off' => 'notifications are switched off, and nothing pulls the results',
         'mail_only' => 'a failing check is delivered by mail alone, and when mail breaks, the message about it is the one that does not arrive. Add a Slack webhook or the Oh Dear endpoint, or name an endpoint of the application\'s own that a monitor pulls in production-preflight.health_endpoint.',
         'none' => 'no channel delivers a failing check',
+        'unserved' => 'Oh Dear is switched on, and laravel-health serves it no endpoint to pull the results from.',
+        'unserved_secret' => 'laravel-health serves the Oh Dear endpoint only with a secret, and none is set, so Oh Dear finds nothing to pull. Set OH_DEAR_HEALTH_CHECK_SECRET to the secret Oh Dear shows in its Application Health settings.',
+        'unserved_url' => 'laravel-health serves the Oh Dear endpoint only under a url, and none is set, so Oh Dear finds nothing to pull. Set it to the path Oh Dear requests, by default /oh-dear-health-check-results.',
     ],
 
     'test-mode-keys' => [
@@ -154,12 +160,16 @@ return [
         'unconfigured' => 'the default connection is not configured, so dispatching a job raises an error',
         'null' => 'the null driver discards every job it is given',
         'sync' => 'jobs run inside the request that dispatches them, so every response waits for them. A choice for a small installation: acknowledge it if it is yours.',
+        'unattended' => 'The default queue connection runs every job without a worker.',
+        'deferred' => 'the deferred driver runs each job in the PHP process that dispatched it, after the response is sent: a failed job is not tried again, and a job that has not finished is lost when that process ends. A choice for a small installation: acknowledge it if it is yours.',
+        'background' => 'the background driver runs each job in a PHP process started for it: a failed job is not tried again, and a job that has not finished is lost when that process ends. A choice for a small installation: acknowledge it if it is yours.',
     ],
 
     'session-driver' => [
         'label' => 'Session driver',
         'pass' => 'Sessions outlive the request.',
-        'fail' => 'Sessions last for one request.',
+        'fail' => 'Sessions do not outlive the request.',
+        'unconfigured' => 'the session driver is not configured, so the first request that starts a session raises an error',
         'array' => 'the array driver forgets every session after the request, so every user is signed out after each page',
     ],
 
@@ -169,6 +179,10 @@ return [
         'fail' => 'The default cache store keeps nothing past the request.',
         'unconfigured' => 'the default store is not configured, so the first cache access raises an error',
         'transient' => 'the rate limiters, the atomic locks and the restart signal of the queue workers live in the cache and are gone after each request',
+        'fail_session' => 'The default cache store keeps the cache in the session of each visitor.',
+        'session' => 'a throttle counts per visitor and starts over for a client without a cookie, Cache::lock() and a unique job end in an error because the session store holds no lock, and a command, queue:restart among them, writes into a session nobody saves, so no worker hears the restart signal',
+        'warn' => 'The default cache store falls back to one that keeps nothing past the request or keeps it per visitor.',
+        'falls_back' => 'once the stores before it fail, the failover store serves from one that keeps nothing past the request or keeps the cache in the session of each visitor, and the rate limiters, the atomic locks and the restart signal of the queue workers are lost while it does',
     ],
 
     'secure-cookie' => [
@@ -212,15 +226,17 @@ return [
         'label' => 'Queue workers after the deploy',
         'pass' => 'The queue workers were told to restart after the last deploy.',
         'fail' => 'The queue workers run the code from before the last deploy.',
-        'never' => 'no restart signal was ever sent, so the workers run the code they started with. Add php artisan queue:restart to the end of the deploy script.',
-        'stale' => 'the last restart signal is older than the last deploy. Add php artisan queue:restart to the end of the deploy script.',
+        'fail_missing' => 'The queue workers may run the code from before the last deploy: no restart signal is in the cache store.',
+        'missing' => 'either queue:restart did not run after the deploy, or the cache lost the signal since, cleared by cache:clear or optimize:clear, restarted without persistence or evicted, and the workers restarted when it disappeared. Run php artisan reload, or php artisan queue:restart, at the end of the deploy script, after php artisan preflight --deploy and after any cache:clear or optimize:clear.',
+        'stale' => 'the last restart signal is older than the last deploy. Run php artisan reload, or php artisan queue:restart, at the end of the deploy script, after php artisan preflight --deploy.',
         'no_worker' => 'The default queue connection runs no worker to restart.',
-        'no_deploy' => 'Not checked: no deploy is on record. Add php artisan preflight --deploy to the deploy script, ahead of php artisan queue:restart.',
+        'no_deploy' => 'Not checked: no deploy is on record. Add php artisan preflight --deploy to the deploy script, ahead of php artisan reload or php artisan queue:restart.',
     ],
 
     'pending-migrations' => [
         'label' => 'Pending migrations',
         'pass' => 'Every migration has run.',
+        'pass_skipped' => 'Every migration has run, apart from :migrations, which the application skips.',
         'fail' => 'Migrations that have not run: :count. The code is new, the schema is not.',
         'pending' => 'has not run',
         'no_migrator' => 'Not checked: the application has no migrator.',
@@ -232,6 +248,7 @@ return [
         'fail' => 'Paths Laravel cannot write to on :server, asked as :user: :count. The first user action that writes falls over.',
         'fail_unknown_user' => 'Paths Laravel cannot write to on :server: :count. The user this check runs as could not be named. The first user action that writes falls over.',
         'missing' => 'the directory is missing',
+        'not_creatable' => 'the directory is missing, and the directory above it is not writable for the user that runs this check, so Laravel cannot create it',
         'read_only' => 'the directory is not writable for the user that runs this check',
         'log_read_only' => 'the newest log file is not writable for the user that runs this check, so a line it logs is lost',
         'log_directory_read_only' => 'the directory of the newest log file is not writable for the user that runs this check, so the file of the next day cannot be created',
@@ -265,6 +282,8 @@ return [
         'off' => 'Not checked: whether the site serves .env takes a request to the site, and the probe is off. Switch it on with PRODUCTION_PREFLIGHT_HTTP_PROBE=true.',
         'no_url' => 'Not checked: app.url is no http or https address to request.',
         'unanswered' => 'Not checked: the site did not answer.',
+        'redirected' => 'Not checked: the site redirects the request to another address, and the probe follows no redirect. Set app.url to the address it redirects to.',
+        'moved' => 'redirected to :target',
     ],
 
     'dev-dependencies' => [
@@ -291,6 +310,7 @@ return [
         'unnamed' => 'Not checked: the web server\'s PHP is a binary this check runs, and none is named. Set PRODUCTION_PREFLIGHT_PHP_FPM, for example to /usr/sbin/php-fpm8.4.',
         'no_processes' => 'Not checked: this host does not allow starting a process.',
         'unanswered' => 'Not checked: the named binary did not report a PHP version.',
+        'web_request' => 'Not checked: a web request runs the web server\'s PHP, which the check would compare with itself. The check answers on the command line, such as laravel-health\'s scheduled run.',
     ],
 
     'opcache' => [
@@ -306,8 +326,10 @@ return [
 
     'exception-arguments' => [
         'label' => 'Arguments in exception traces',
-        'pass' => 'The traces of exceptions keep no arguments.',
-        'fail' => 'The traces of exceptions keep the arguments of every call.',
+        'pass' => 'The command line\'s traces of exceptions keep no arguments. PHP-FPM reads a php.ini of its own and is judged when the check runs in a web request.',
+        'pass_web' => 'The web server\'s traces of exceptions keep no arguments. The command line reads a php.ini of its own and is judged when the check runs on the command line.',
+        'fail' => 'The command line\'s traces of exceptions keep the arguments of every call.',
+        'fail_web' => 'The web server\'s traces of exceptions keep the arguments of every call.',
         'finding' => 'Laravel logs the trace of every reported exception, and a short secret stands there whole. Set zend.exception_ignore_args = On in the php.ini of the command line and of PHP-FPM, and reload PHP.',
     ],
 

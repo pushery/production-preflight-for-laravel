@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pushery\ProductionPreflight\Checks\Host;
 
+use Illuminate\Contracts\Foundation\CachesConfiguration;
+use Illuminate\Contracts\Foundation\CachesRoutes;
 use Illuminate\Filesystem\Filesystem;
 use Override;
 use Pushery\ProductionPreflight\Checks\ProductionCheck;
@@ -16,6 +18,13 @@ use Pushery\ProductionPreflight\Support\ProcessUser;
 /**
  * The directories Laravel writes to, missing or not writable: the first user action that writes,
  * a session, a cached view, a log line, falls over.
+ *
+ * Where the configuration points Laravel elsewhere, the check asks there: `view.compiled`, the `path`
+ * of a default cache store on the `file` driver, `session.files` under the `file` session driver, and
+ * the directories of the cached configuration, services, packages, routes and events, which
+ * `APP_CONFIG_CACHE` and its siblings move out of `bootstrap/cache`. Laravel creates the compiled views
+ * and the directories of a file cache store on their first write, so a configured one may be missing
+ * as long as the directory above it is writable; every other directory has to exist.
  *
  * Asked as the user that runs the check. On most servers the scheduler and the web server run as the
  * same user; where they do not, the answer describes the scheduler's, and the finding says so.
@@ -55,11 +64,11 @@ final class WritableDirectoriesCheck extends ProductionCheck
         $files = $this->app->make(Filesystem::class);
         $findings = [];
 
-        foreach ($this->directories() as $directory) {
+        foreach ($this->directories() as $directory => $createdOnWrite) {
             $problem = match (true) {
-                ! $files->isDirectory($directory) => 'writable-directories.missing',
-                ! $files->isWritable($directory) => 'writable-directories.read_only',
-                default => null,
+                $files->isDirectory($directory) => $files->isWritable($directory) ? null : 'writable-directories.read_only',
+                ! $createdOnWrite => 'writable-directories.missing',
+                default => $files->isWritable(dirname($directory)) ? null : 'writable-directories.not_creatable',
             };
 
             if ($problem !== null) {
@@ -122,17 +131,75 @@ final class WritableDirectoriesCheck extends ProductionCheck
     }
 
     /**
-     * @return list<string>
+     * The directories Laravel writes to, each with whether Laravel creates it on its first write. A
+     * setting that holds no path leaves the directory Laravel uses by default.
+     *
+     * @return array<string, bool>
      */
     private function directories(): array
     {
-        return [
-            $this->app->storagePath(),
-            $this->app->storagePath('framework/cache'),
-            $this->app->storagePath('framework/sessions'),
-            $this->app->storagePath('framework/views'),
-            $this->app->storagePath('logs'),
-            $this->app->bootstrapPath('cache'),
-        ];
+        $directories = [$this->app->storagePath() => false, $this->app->storagePath('framework/cache') => false];
+        $store = $this->config('cache.default');
+        $storePath = is_string($store) && $this->defaultDriver('cache.default', 'cache.stores') === 'file' ? $this->configuredPath('cache.stores.'.$store.'.path') : null;
+        $session = $this->config('session.driver');
+        $views = $this->configuredPath('view.compiled');
+
+        if ($storePath !== null) {
+            $directories += [$storePath => true];
+        }
+
+        if (is_string($session) && strtolower($session) === 'file') {
+            $directories += [$this->configuredPath('session.files') ?? $this->app->storagePath('framework/sessions') => false];
+        }
+
+        $directories += $views === null ? [$this->app->storagePath('framework/views') => false] : [$views => true];
+        $directories += [$this->app->storagePath('logs') => false];
+
+        foreach ($this->bootstrapCaches() as $cache) {
+            $directories += [dirname($cache) => false];
+        }
+
+        return $directories;
+    }
+
+    /**
+     * The files `config:cache`, `route:cache`, `event:cache` and package discovery write, where the
+     * application names them.
+     *
+     * @return list<string>
+     */
+    private function bootstrapCaches(): array
+    {
+        $app = $this->app;
+        $caches = [];
+
+        if ($app instanceof CachesConfiguration) {
+            $caches[] = $app->getCachedConfigPath();
+            $caches[] = $app->getCachedServicesPath();
+        }
+
+        if ($app instanceof CachesRoutes) {
+            $caches[] = $app->getCachedRoutesPath();
+        }
+
+        if (method_exists($app, 'getCachedPackagesPath')) {
+            $caches[] = $app->getCachedPackagesPath();
+        }
+
+        if (method_exists($app, 'getCachedEventsPath')) {
+            $caches[] = $app->getCachedEventsPath();
+        }
+
+        return array_values(array_filter($caches, is_string(...)));
+    }
+
+    /**
+     * The path a setting holds; null where it holds none.
+     */
+    private function configuredPath(string $key): ?string
+    {
+        $path = $this->config($key);
+
+        return is_string($path) && $path !== '' ? $path : null;
     }
 }

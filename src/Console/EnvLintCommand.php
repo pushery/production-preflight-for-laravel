@@ -17,8 +17,11 @@ use Pushery\ProductionPreflight\Scope;
  * two lines are harmless today and one edit away from a setting that does not apply, and a linter
  * that let the one case through would soon let the other.
  *
- * A file that cannot be read exits with 2, never 0. Whoever hangs this command into a deploy relies
- * on a green exit meaning something, and "nothing found" and "not looked" must not read alike.
+ * A check that could not look exits with 2, never 0, unless another one found something: the file or
+ * the example file cannot be read, or the stage, read from the file's `APP_ENV` and from `app.env`
+ * where the file sets none, is on none of the lists in `production-preflight.stages`. Whoever hangs
+ * this command into a deploy relies on a green exit meaning something, and "nothing found" and "not
+ * looked" must not read alike.
  */
 final class EnvLintCommand extends Command
 {
@@ -35,7 +38,7 @@ final class EnvLintCommand extends Command
     /**
      * @var string
      */
-    protected $description = 'Lint a .env file: keys set twice, keys of the example file, placeholders, a cut-off # and bytes that do not show (exit 1 on a finding, 2 when nothing could be checked)';
+    protected $description = 'Lint a .env file: keys set twice, keys of the example file, placeholders, a cut-off # and bytes that do not show (exit 1 on a finding, 2 when a check could not look)';
 
     public function handle(Repository $config): int
     {

@@ -90,11 +90,11 @@ return [
 
     'development-stage-server' => [
         'label' => 'Environnement de développement sur un serveur',
-        'pass' => 'L’application est servie sur :host, qui est une machine de développement.',
+        'pass' => 'app.url nomme un hôte sous lequel une machine de développement est servie.',
         'not_development' => 'Rien à vérifier : seul un environnement de développement est lu au regard de son hôte, et l’application déclare l’environnement :stage.',
         'no_host' => 'app.url ne nomme aucun hôte, on ne peut donc pas juger si un serveur déclare un environnement de développement.',
-        'fail' => 'APP_ENV vaut :env et app.url nomme :host : un serveur qui déclare un environnement de développement, sur lequel toute vérification de production passe.',
-        'finding' => ':host n’est pas un hôte sous lequel une machine de développement est servie, APP_ENV garde donc sans doute la valeur de .env.example',
+        'fail' => 'APP_ENV nomme un environnement de développement et app.url un hôte sous lequel aucune machine de développement n’est servie : un serveur qui déclare un environnement de développement, sur lequel toute vérification de production passe.',
+        'finding' => 'ne nomme aucun hôte sous lequel une machine de développement est servie, APP_ENV garde donc sans doute la valeur de .env.example',
     ],
 
     'app-debug' => [
@@ -106,11 +106,13 @@ return [
 
     'app-key' => [
         'label' => 'Clé de l’application',
-        'pass' => 'La clé de l’application est définie, et ce n’est ni une valeur factice ni celle du fichier d’exemple.',
-        'fail' => 'La clé de l’application manque ou est connue d’autres, sessions, cookies et données chiffrées peuvent donc être falsifiés.',
+        'pass' => 'La clé de l’application est définie, et ni elle ni une clé précédente n’est une valeur factice ou une clé du fichier d’exemple.',
+        'fail' => 'La clé de l’application manque, ou une clé que l’application accepte est connue d’autres, sessions, cookies, données chiffrées et URL signées peuvent donc être falsifiés.',
         'missing' => 'aucune clé n’est définie',
         'placeholder' => 'la clé est une valeur factice qu’une ancienne version de Laravel livrait dans son fichier d’exemple',
         'committed' => 'la clé est celle du fichier d’exemple versionné',
+        'previous_placeholder' => 'la clé précédente en position :position est une valeur factice qu’une ancienne version de Laravel livrait dans son fichier d’exemple, et l’application accepte toujours les cookies, données chiffrées et URL signées faits avec elle',
+        'previous_committed' => 'la clé précédente en position :position est une clé du fichier d’exemple versionné, et l’application accepte toujours les cookies, données chiffrées et URL signées faits avec elle',
     ],
 
     'mail-transport' => [
@@ -119,6 +121,7 @@ return [
         'fail' => 'Le mailer par défaut ne distribue aucun e-mail : inscriptions, réinitialisations de mot de passe et factures disparaissent sans bruit.',
         'warn' => 'Le mailer par défaut envoie vers cette machine. Un relais à cet endroit doit transmettre les e-mails.',
         'unconfigured' => 'le mailer n’est pas configuré, l’envoi lève donc une erreur',
+        'url' => 'l’URL du mailer ne nomme aucun transport que Laravel sache lire, l’envoi lève donc une erreur',
         'log' => 'le transport log écrit chaque message dans le journal et n’en envoie aucun',
         'array' => 'le transport array garde chaque message en mémoire et n’en envoie aucun',
         'catcher' => 'l’hôte SMTP est un capteur d’e-mails, où les messages s’arrêtent sans qu’aucune boîte ne les reçoive',
@@ -129,11 +132,14 @@ return [
         'label' => 'Une seconde voie pour les alertes',
         'pass' => 'Une vérification en échec vous parvient par un canal autre que l’e-mail.',
         'pulled' => 'Oh Dear récupère les résultats, indépendamment des e-mails de l’application.',
-        'pulled_own' => 'Un moniteur récupère les résultats sur :endpoint, indépendamment des e-mails de l’application.',
+        'pulled_own' => 'Un moniteur récupère les résultats sur le point d’accès que nomme production-preflight.health_endpoint, indépendamment des e-mails de l’application.',
         'warn' => 'Une vérification en échec en exploitation ne vous parviendrait pas si l’e-mail tombait en panne.',
         'off' => 'les notifications sont désactivées, et rien ne récupère les résultats',
         'mail_only' => 'une vérification en échec n’est distribuée que par e-mail, et quand l’e-mail tombe en panne, c’est justement le message à ce sujet qui n’arrive pas. Ajoutez un webhook Slack ou le point d’accès Oh Dear, ou nommez dans production-preflight.health_endpoint un point d’accès propre qu’un moniteur interroge.',
         'none' => 'aucun canal ne distribue une vérification en échec',
+        'unserved' => 'Oh Dear est activé, et laravel-health ne lui sert aucun point d’accès où récupérer les résultats.',
+        'unserved_secret' => 'laravel-health ne sert le point d’accès Oh Dear qu’avec un secret, et aucun n’est défini, donc Oh Dear ne trouve rien à récupérer. Définissez OH_DEAR_HEALTH_CHECK_SECRET sur le secret qu’Oh Dear affiche dans ses réglages Application Health.',
+        'unserved_url' => 'laravel-health ne sert le point d’accès Oh Dear qu’à une url, et aucune n’est définie, donc Oh Dear ne trouve rien à récupérer. Définissez-la sur le chemin qu’interroge Oh Dear, par défaut /oh-dear-health-check-results.',
     ],
 
     'test-mode-keys' => [
@@ -154,12 +160,16 @@ return [
         'unconfigured' => 'la connexion par défaut n’est pas configurée, mettre une tâche en file lève donc une erreur',
         'null' => 'le driver null rejette chaque tâche qu’il reçoit',
         'sync' => 'les tâches s’exécutent dans la requête qui les met en file, chaque réponse les attend donc. Un choix pour une petite installation : acceptez-le si c’est le vôtre.',
+        'unattended' => 'La connexion de file par défaut exécute chaque tâche sans aucun worker.',
+        'deferred' => 'le driver deferred exécute chaque tâche dans le processus PHP qui l’a mise en file, une fois la réponse envoyée : une tâche en échec n’est pas retentée, et une tâche inachevée est perdue quand ce processus se termine. Un choix pour une petite installation : acceptez-le si c’est le vôtre.',
+        'background' => 'le driver background exécute chaque tâche dans un processus PHP lancé pour elle : une tâche en échec n’est pas retentée, et une tâche inachevée est perdue quand ce processus se termine. Un choix pour une petite installation : acceptez-le si c’est le vôtre.',
     ],
 
     'session-driver' => [
         'label' => 'Driver de session',
         'pass' => 'Les sessions survivent à la requête.',
-        'fail' => 'Les sessions durent une requête.',
+        'fail' => 'Les sessions ne survivent pas à la requête.',
+        'unconfigured' => 'le driver de session n’est pas configuré, la première requête qui démarre une session lève donc une erreur',
         'array' => 'le driver array oublie chaque session après la requête, chaque utilisateur est donc déconnecté après chaque page',
     ],
 
@@ -169,6 +179,10 @@ return [
         'fail' => 'Le stockage de cache par défaut ne conserve rien au-delà de la requête.',
         'unconfigured' => 'le stockage par défaut n’est pas configuré, le premier accès au cache lève donc une erreur',
         'transient' => 'les limiteurs de débit, les verrous atomiques et le signal de redémarrage des workers vivent dans le cache et disparaissent après chaque requête',
+        'fail_session' => 'Le stockage de cache par défaut garde le cache dans la session de chaque visiteur.',
+        'session' => 'un limiteur de débit compte par visiteur et repart de zéro pour un client sans cookie, Cache::lock() et un job unique finissent en erreur car le stockage de session ne connaît aucun verrou, et une commande, queue:restart comprise, écrit dans une session que personne n’enregistre, si bien qu’aucun worker ne reçoit le signal de redémarrage',
+        'warn' => 'Le stockage de cache par défaut se replie sur un stockage qui ne conserve rien au-delà de la requête ou qui garde le cache par visiteur.',
+        'falls_back' => 'dès que les stockages qui le précèdent tombent en panne, le stockage failover sert depuis un stockage qui ne conserve rien au-delà de la requête ou qui garde le cache dans la session de chaque visiteur, et les limiteurs de débit, les verrous atomiques et le signal de redémarrage des workers sont perdus pendant ce temps',
     ],
 
     'secure-cookie' => [
@@ -212,15 +226,17 @@ return [
         'label' => 'Workers de file après le déploiement',
         'pass' => 'Les workers de file ont reçu l’ordre de redémarrer après le dernier déploiement.',
         'fail' => 'Les workers de file exécutent le code d’avant le dernier déploiement.',
-        'never' => 'aucun signal de redémarrage n’a jamais été envoyé, les workers exécutent donc le code avec lequel ils ont démarré. Ajoutez php artisan queue:restart à la fin du script de déploiement.',
-        'stale' => 'le dernier signal de redémarrage est antérieur au dernier déploiement. Ajoutez php artisan queue:restart à la fin du script de déploiement.',
+        'fail_missing' => 'Les workers de file exécutent peut-être le code d’avant le dernier déploiement : aucun signal de redémarrage ne se trouve dans le stockage de cache.',
+        'missing' => 'soit queue:restart n’a pas été exécuté après le déploiement, soit le cache a perdu le signal depuis, vidé par cache:clear ou optimize:clear, redémarré sans persistance ou évincé, et les workers ont redémarré quand il a disparu. Exécutez php artisan reload, ou php artisan queue:restart, à la fin du script de déploiement, après php artisan preflight --deploy et après tout cache:clear ou optimize:clear.',
+        'stale' => 'le dernier signal de redémarrage est antérieur au dernier déploiement. Exécutez php artisan reload, ou php artisan queue:restart, à la fin du script de déploiement, après php artisan preflight --deploy.',
         'no_worker' => 'La connexion de file par défaut n’a aucun worker à redémarrer.',
-        'no_deploy' => 'Non vérifié : aucun déploiement n’est enregistré. Ajoutez php artisan preflight --deploy au script de déploiement, avant php artisan queue:restart.',
+        'no_deploy' => 'Non vérifié : aucun déploiement n’est enregistré. Ajoutez php artisan preflight --deploy au script de déploiement, avant php artisan reload ou php artisan queue:restart.',
     ],
 
     'pending-migrations' => [
         'label' => 'Migrations en attente',
         'pass' => 'Toutes les migrations ont été exécutées.',
+        'pass_skipped' => 'Toutes les migrations ont été exécutées, sauf :migrations, que l’application laisse de côté.',
         'fail' => 'Migrations non exécutées : :count. Le code est nouveau, le schéma ne l’est pas.',
         'pending' => 'n’a pas été exécutée',
         'no_migrator' => 'Non vérifié : l’application n’a pas de migrateur.',
@@ -232,6 +248,7 @@ return [
         'fail' => 'Chemins où Laravel ne peut pas écrire sur :server, vérifié en tant que :user : :count. La première action d’un utilisateur qui écrit échoue.',
         'fail_unknown_user' => 'Chemins où Laravel ne peut pas écrire sur :server : :count. L’utilisateur sous lequel cette vérification s’exécute n’a pas pu être nommé. La première action d’un utilisateur qui écrit échoue.',
         'missing' => 'le répertoire est absent',
+        'not_creatable' => 'le répertoire est absent, et le répertoire parent n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification, Laravel ne peut donc pas le créer',
         'read_only' => 'le répertoire n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification',
         'log_read_only' => 'le fichier journal le plus récent n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification, et une ligne qu’il journalise est perdue',
         'log_directory_read_only' => 'le répertoire du fichier journal le plus récent n’est pas accessible en écriture pour l’utilisateur qui exécute cette vérification, et le fichier du lendemain ne peut pas être créé',
@@ -265,6 +282,8 @@ return [
         'off' => 'Non vérifié : savoir si le site sert .env demande une requête au site, et la sonde est désactivée. Activez-la avec PRODUCTION_PREFLIGHT_HTTP_PROBE=true.',
         'no_url' => 'Non vérifié : app.url n’est pas une adresse http ou https à interroger.',
         'unanswered' => 'Non vérifié : le site n’a pas répondu.',
+        'redirected' => 'Non vérifié : le site redirige la requête vers une autre adresse, et la sonde ne suit aucune redirection. Mettez dans app.url l’adresse vers laquelle il redirige.',
+        'moved' => 'redirigé vers :target',
     ],
 
     'dev-dependencies' => [
@@ -291,6 +310,7 @@ return [
         'unnamed' => 'Non vérifié : le PHP du serveur web est un binaire que cette vérification exécute, et aucun n’est indiqué. Définissez PRODUCTION_PREFLIGHT_PHP_FPM, par exemple sur /usr/sbin/php-fpm8.4.',
         'no_processes' => 'Non vérifié : cet hôte ne permet pas de lancer un processus.',
         'unanswered' => 'Non vérifié : le binaire indiqué n’a signalé aucune version de PHP.',
+        'web_request' => 'Non vérifié : une requête web tourne sous le PHP du serveur web, que la vérification comparerait à lui-même. La vérification répond en ligne de commande, comme lors de l’exécution planifiée de laravel-health.',
     ],
 
     'opcache' => [
@@ -306,8 +326,10 @@ return [
 
     'exception-arguments' => [
         'label' => 'Arguments dans les traces d’exceptions',
-        'pass' => 'Les traces des exceptions ne gardent aucun argument.',
-        'fail' => 'Les traces des exceptions gardent les arguments de chaque appel.',
+        'pass' => 'Les traces des exceptions en ligne de commande ne gardent aucun argument. PHP-FPM lit son propre php.ini et est jugé quand la vérification tourne dans une requête web.',
+        'pass_web' => 'Les traces des exceptions du serveur web ne gardent aucun argument. La ligne de commande lit son propre php.ini et est jugée quand la vérification tourne en ligne de commande.',
+        'fail' => 'Les traces des exceptions en ligne de commande gardent les arguments de chaque appel.',
+        'fail_web' => 'Les traces des exceptions du serveur web gardent les arguments de chaque appel.',
         'finding' => 'Laravel journalise la trace de chaque exception signalée, et un secret court y figure en entier. Réglez zend.exception_ignore_args = On dans le php.ini de la ligne de commande et de PHP-FPM, puis rechargez PHP.',
     ],
 

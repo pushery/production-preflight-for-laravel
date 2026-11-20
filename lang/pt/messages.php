@@ -90,11 +90,11 @@ return [
 
     'development-stage-server' => [
         'label' => 'Ambiente de desenvolvimento num servidor',
-        'pass' => 'A aplicação é servida em :host, que é uma máquina de desenvolvimento.',
+        'pass' => 'app.url indica um host sob o qual uma máquina de desenvolvimento é servida.',
         'not_development' => 'Nada a verificar: só um ambiente de desenvolvimento é lido em relação ao seu host, e a aplicação declara o ambiente :stage.',
         'no_host' => 'app.url não indica nenhum host, por isso não se pode avaliar se um servidor declara um ambiente de desenvolvimento.',
-        'fail' => 'APP_ENV é :env e app.url indica :host: um servidor que declara um ambiente de desenvolvimento, no qual todas as verificações de produção passam.',
-        'finding' => ':host não é um host sob o qual uma máquina de desenvolvimento é servida, por isso APP_ENV mantém provavelmente o valor de .env.example',
+        'fail' => 'APP_ENV indica um ambiente de desenvolvimento e app.url um host sob o qual nenhuma máquina de desenvolvimento é servida: um servidor que declara um ambiente de desenvolvimento, no qual todas as verificações de produção passam.',
+        'finding' => 'não indica nenhum host sob o qual uma máquina de desenvolvimento é servida, por isso APP_ENV mantém provavelmente o valor de .env.example',
     ],
 
     'app-debug' => [
@@ -106,11 +106,13 @@ return [
 
     'app-key' => [
         'label' => 'Chave da aplicação',
-        'pass' => 'A chave da aplicação está definida, e não é nem um marcador nem a do ficheiro de exemplo.',
-        'fail' => 'A chave da aplicação falta ou é conhecida por outros, por isso sessões, cookies e dados cifrados podem ser falsificados.',
+        'pass' => 'A chave da aplicação está definida, e nem ela nem uma chave anterior é um marcador ou uma chave do ficheiro de exemplo.',
+        'fail' => 'A chave da aplicação falta, ou uma chave que a aplicação aceita é conhecida por outros, por isso sessões, cookies, dados cifrados e URL assinados podem ser falsificados.',
         'missing' => 'nenhuma chave está definida',
         'placeholder' => 'a chave é um marcador que uma versão antiga do Laravel incluía no seu ficheiro de exemplo',
         'committed' => 'a chave é a do ficheiro de exemplo versionado',
+        'previous_placeholder' => 'a chave anterior na posição :position é um marcador que uma versão antiga do Laravel incluía no seu ficheiro de exemplo, e a aplicação continua a aceitar cookies, dados cifrados e URL assinados feitos com ela',
+        'previous_committed' => 'a chave anterior na posição :position é uma do ficheiro de exemplo versionado, e a aplicação continua a aceitar cookies, dados cifrados e URL assinados feitos com ela',
     ],
 
     'mail-transport' => [
@@ -119,6 +121,7 @@ return [
         'fail' => 'O mailer predefinido não entrega nenhum email: registos, redefinições de palavra-passe e faturas desaparecem sem ruído.',
         'warn' => 'O mailer predefinido envia para esta mesma máquina. Um relay aí tem de reencaminhar o email.',
         'unconfigured' => 'o mailer não está configurado, por isso enviar gera um erro',
+        'url' => 'o URL do mailer não indica nenhum transporte que o Laravel consiga ler, por isso enviar gera um erro',
         'log' => 'o transporte log escreve cada mensagem no log e não envia nenhuma',
         'array' => 'o transporte array guarda cada mensagem em memória e não envia nenhuma',
         'catcher' => 'o host SMTP é um capturador de email, onde as mensagens param e nenhuma caixa as recebe',
@@ -129,11 +132,14 @@ return [
         'label' => 'Um segundo caminho para os alertas',
         'pass' => 'Uma verificação falhada chega até si por um canal além do email.',
         'pulled' => 'O Oh Dear recolhe os resultados, independentemente do email da aplicação.',
-        'pulled_own' => 'Um monitor recolhe os resultados em :endpoint, independentemente do email da aplicação.',
+        'pulled_own' => 'Um monitor recolhe os resultados no endpoint que production-preflight.health_endpoint indica, independentemente do email da aplicação.',
         'warn' => 'Uma verificação falhada em operação não chegaria até si se o email deixasse de funcionar.',
         'off' => 'as notificações estão desligadas, e nada recolhe os resultados',
         'mail_only' => 'uma verificação falhada só é entregue por email, e quando o email deixa de funcionar, a mensagem sobre isso é precisamente a que não chega. Adicione um webhook do Slack ou o endpoint do Oh Dear, ou indique em production-preflight.health_endpoint um endpoint próprio que um monitor consulte.',
         'none' => 'nenhum canal entrega uma verificação falhada',
+        'unserved' => 'O Oh Dear está ligado, e o laravel-health não lhe disponibiliza nenhum endpoint onde recolher os resultados.',
+        'unserved_secret' => 'o laravel-health só disponibiliza o endpoint do Oh Dear com um segredo, e nenhum está definido, por isso o Oh Dear não encontra nada para recolher. Defina OH_DEAR_HEALTH_CHECK_SECRET com o segredo que o Oh Dear mostra nas definições Application Health.',
+        'unserved_url' => 'o laravel-health só disponibiliza o endpoint do Oh Dear num url, e nenhum está definido, por isso o Oh Dear não encontra nada para recolher. Defina-o com o caminho que o Oh Dear consulta, por omissão /oh-dear-health-check-results.',
     ],
 
     'test-mode-keys' => [
@@ -154,12 +160,16 @@ return [
         'unconfigured' => 'a ligação predefinida não está configurada, por isso colocar um job na fila gera um erro',
         'null' => 'o driver null descarta cada job que recebe',
         'sync' => 'os jobs correm dentro do pedido que os coloca na fila, por isso cada resposta espera por eles. Uma escolha para uma instalação pequena: assuma-a se for a sua.',
+        'unattended' => 'A ligação de fila predefinida executa cada job sem nenhum worker.',
+        'deferred' => 'o driver deferred executa cada job no processo PHP que o colocou na fila, depois de a resposta ser enviada: um job falhado não é repetido, e um job por terminar perde-se quando esse processo termina. Uma escolha para uma instalação pequena: assuma-a se for a sua.',
+        'background' => 'o driver background executa cada job num processo PHP iniciado para ele: um job falhado não é repetido, e um job por terminar perde-se quando esse processo termina. Uma escolha para uma instalação pequena: assuma-a se for a sua.',
     ],
 
     'session-driver' => [
         'label' => 'Driver de sessão',
         'pass' => 'As sessões sobrevivem ao pedido.',
-        'fail' => 'As sessões duram um pedido.',
+        'fail' => 'As sessões não sobrevivem ao pedido.',
+        'unconfigured' => 'o driver de sessão não está configurado, por isso o primeiro pedido que inicia uma sessão gera um erro',
         'array' => 'o driver array esquece cada sessão depois do pedido, por isso cada utilizador fica desligado depois de cada página',
     ],
 
@@ -169,6 +179,10 @@ return [
         'fail' => 'O armazenamento de cache predefinido não guarda nada para além do pedido.',
         'unconfigured' => 'o armazenamento predefinido não está configurado, por isso o primeiro acesso à cache gera um erro',
         'transient' => 'os limitadores de pedidos, os bloqueios atómicos e o sinal de reinício dos workers vivem na cache e desaparecem depois de cada pedido',
+        'fail_session' => 'O armazenamento de cache predefinido guarda a cache na sessão de cada visitante.',
+        'session' => 'um limitador de pedidos conta por visitante e recomeça do zero para um cliente sem cookie, Cache::lock() e um job único terminam num erro porque o armazenamento de sessão não tem bloqueios, e um comando, incluindo queue:restart, escreve numa sessão que ninguém guarda, por isso nenhum worker recebe o sinal de reinício',
+        'warn' => 'O armazenamento de cache predefinido recorre a um que não guarda nada para além do pedido ou que guarda a cache por visitante.',
+        'falls_back' => 'assim que os armazenamentos anteriores falham, o armazenamento failover serve a partir de um que não guarda nada para além do pedido ou que guarda a cache na sessão de cada visitante, e os limitadores de pedidos, os bloqueios atómicos e o sinal de reinício dos workers perdem-se enquanto isso dura',
     ],
 
     'secure-cookie' => [
@@ -212,15 +226,17 @@ return [
         'label' => 'Workers da fila depois do deploy',
         'pass' => 'Foi pedido aos workers da fila que reiniciassem depois do último deploy.',
         'fail' => 'Os workers da fila correm o código de antes do último deploy.',
-        'never' => 'nunca foi enviado um sinal de reinício, por isso os workers correm o código com que arrancaram. Acrescente php artisan queue:restart ao fim do script de deploy.',
-        'stale' => 'o último sinal de reinício é mais antigo do que o último deploy. Acrescente php artisan queue:restart ao fim do script de deploy.',
+        'fail_missing' => 'Os workers da fila talvez corram o código de antes do último deploy: não há nenhum sinal de reinício no armazenamento de cache.',
+        'missing' => 'ou queue:restart não correu depois do deploy, ou a cache perdeu o sinal desde então, limpa por cache:clear ou optimize:clear, reiniciada sem persistência ou despejada, e os workers reiniciaram quando ele desapareceu. Acrescente php artisan reload, ou php artisan queue:restart, ao fim do script de deploy, depois de php artisan preflight --deploy e depois de qualquer cache:clear ou optimize:clear.',
+        'stale' => 'o último sinal de reinício é mais antigo do que o último deploy. Acrescente php artisan reload, ou php artisan queue:restart, ao fim do script de deploy, depois de php artisan preflight --deploy.',
         'no_worker' => 'A ligação de fila predefinida não tem nenhum worker para reiniciar.',
-        'no_deploy' => 'Não verificado: nenhum deploy está registado. Acrescente php artisan preflight --deploy ao script de deploy, antes de php artisan queue:restart.',
+        'no_deploy' => 'Não verificado: nenhum deploy está registado. Acrescente php artisan preflight --deploy ao script de deploy, antes de php artisan reload ou php artisan queue:restart.',
     ],
 
     'pending-migrations' => [
         'label' => 'Migrações pendentes',
         'pass' => 'Todas as migrações foram executadas.',
+        'pass_skipped' => 'Todas as migrações foram executadas, exceto :migrations, que a aplicação salta.',
         'fail' => 'Migrações que não foram executadas: :count. O código é novo, o esquema não.',
         'pending' => 'não foi executada',
         'no_migrator' => 'Não verificado: a aplicação não tem migrador.',
@@ -232,6 +248,7 @@ return [
         'fail' => 'Caminhos onde o Laravel não consegue escrever em :server, verificado como :user: :count. A primeira ação de um utilizador que escreve falha.',
         'fail_unknown_user' => 'Caminhos onde o Laravel não consegue escrever em :server: :count. Não foi possível nomear o utilizador com que esta verificação corre. A primeira ação de um utilizador que escreve falha.',
         'missing' => 'a pasta falta',
+        'not_creatable' => 'a pasta falta, e a pasta que a contém não permite escrita ao utilizador que executa esta verificação, por isso o Laravel não a consegue criar',
         'read_only' => 'a pasta não permite escrita ao utilizador que executa esta verificação',
         'log_read_only' => 'o ficheiro de registo mais recente não permite escrita ao utilizador que executa esta verificação, e uma linha que ele regista perde-se',
         'log_directory_read_only' => 'a pasta do ficheiro de registo mais recente não permite escrita ao utilizador que executa esta verificação, e o ficheiro do dia seguinte não pode ser criado',
@@ -265,6 +282,8 @@ return [
         'off' => 'Não verificado: saber se o site serve o .env exige um pedido ao site, e a sonda está desligada. Ligue-a com PRODUCTION_PREFLIGHT_HTTP_PROBE=true.',
         'no_url' => 'Não verificado: app.url não é um endereço http ou https a consultar.',
         'unanswered' => 'Não verificado: o site não respondeu.',
+        'redirected' => 'Não verificado: o site redireciona o pedido para outro endereço, e a sonda não segue nenhum redirecionamento. Defina em app.url o endereço para onde redireciona.',
+        'moved' => 'redirecionado para :target',
     ],
 
     'dev-dependencies' => [
@@ -291,6 +310,7 @@ return [
         'unnamed' => 'Não verificado: o PHP do servidor web é um binário que esta verificação executa, e nenhum foi indicado. Defina PRODUCTION_PREFLIGHT_PHP_FPM, por exemplo como /usr/sbin/php-fpm8.4.',
         'no_processes' => 'Não verificado: este servidor não permite iniciar um processo.',
         'unanswered' => 'Não verificado: o binário indicado não comunicou nenhuma versão de PHP.',
+        'web_request' => 'Não verificado: um pedido web corre com o PHP do servidor web, que a verificação compararia consigo mesmo. A verificação responde na linha de comandos, como na execução agendada do laravel-health.',
     ],
 
     'opcache' => [
@@ -306,8 +326,10 @@ return [
 
     'exception-arguments' => [
         'label' => 'Argumentos nos rastos de exceções',
-        'pass' => 'Os rastos das exceções não guardam argumentos.',
-        'fail' => 'Os rastos das exceções guardam os argumentos de cada chamada.',
+        'pass' => 'Os rastos das exceções na linha de comandos não guardam argumentos. O PHP-FPM lê um php.ini próprio e é avaliado quando a verificação corre num pedido web.',
+        'pass_web' => 'Os rastos das exceções no servidor web não guardam argumentos. A linha de comandos lê um php.ini próprio e é avaliada quando a verificação corre na linha de comandos.',
+        'fail' => 'Os rastos das exceções na linha de comandos guardam os argumentos de cada chamada.',
+        'fail_web' => 'Os rastos das exceções no servidor web guardam os argumentos de cada chamada.',
         'finding' => 'O Laravel regista o rasto de cada exceção reportada, e um segredo curto aparece lá inteiro. Defina zend.exception_ignore_args = On no php.ini da linha de comandos e do PHP-FPM, e recarregue o PHP.',
     ],
 

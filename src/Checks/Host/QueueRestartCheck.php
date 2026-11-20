@@ -16,13 +16,21 @@ use Pushery\ProductionPreflight\Scope;
  * Queue workers that still run the code from before the last deploy.
  *
  * A worker loads the application once and keeps it until it hears the restart signal, which
- * `queue:restart` writes into the default cache store as a time. A deploy that forgets the command
- * leaves the workers on the old code for as long as they live, and nothing shows it: they process
- * jobs, just with yesterday's classes.
+ * `queue:restart` writes into the default cache store as a time, on its own or as part of
+ * `php artisan reload`. A deploy that forgets both leaves the workers on the old code for as long as
+ * they live, and nothing shows it: they process jobs, just with yesterday's classes.
  *
  * The check holds that time against the time `preflight --deploy` recorded. So the deploy script runs
- * `preflight --deploy` before `queue:restart`; without a recorded deploy the check cannot tell and
- * says so. A queue that runs on `sync` or `null` has no worker to restart.
+ * `preflight --deploy` before `php artisan reload`, or `queue:restart`; without a recorded deploy the
+ * check cannot tell and says so. A queue that runs on `sync`, `deferred`, `background` or `null` has
+ * no worker to restart, and neither has a `failover` connection made only of such connections.
+ *
+ * A signal older than the deploy means the workers run the old code. A missing one has two causes
+ * nothing tells apart: `queue:restart` never ran, or the cache lost the signal after it, cleared by
+ * `cache:clear` or `optimize:clear`, restarted without persistence or evicted. A worker restarts when
+ * the signal it started with changes, so in the second case the workers restarted when it
+ * disappeared. The check fails, because the first case is the one it exists for, and its finding names
+ * both.
  */
 final class QueueRestartCheck extends ProductionCheck
 {
@@ -55,7 +63,7 @@ final class QueueRestartCheck extends ProductionCheck
     #[Override]
     protected function inspectProduction(): Inspection
     {
-        if (in_array($this->defaultDriver('queue.default', 'queue.connections'), ['sync', 'null'], true)) {
+        if ($this->queueRunsWithoutWorker()) {
             return Inspection::pass($this->message('queue-restart.no_worker'));
         }
 
@@ -68,7 +76,7 @@ final class QueueRestartCheck extends ProductionCheck
         $signal = $this->app->make(Repository::class)->get(self::SIGNAL);
 
         if (! is_numeric($signal)) {
-            return Inspection::fail($this->message('queue-restart.fail'), [new Finding('queue:restart', $this->message('queue-restart.never'))]);
+            return Inspection::fail($this->message('queue-restart.fail_missing'), [new Finding('queue:restart', $this->message('queue-restart.missing'))]);
         }
 
         return (int) $signal < $deployed

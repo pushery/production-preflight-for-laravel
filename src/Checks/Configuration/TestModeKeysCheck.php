@@ -89,6 +89,8 @@ final class TestModeKeysCheck extends ProductionCheck
 
     /**
      * The reason a single setting is in test mode, or null.
+     *
+     * @param  mixed  $value  the setting as the configuration holds it, which a host may write as any type
      */
     private function testMode(string $name, mixed $value): ?string
     {
@@ -104,6 +106,8 @@ final class TestModeKeysCheck extends ProductionCheck
 
         return match (true) {
             preg_match('/^(?:sk|pk|rk)_test_/', $value) === 1 => 'test-mode-keys.stripe',
+            // `$` also matches before a line feed at the end of the value, and that is wanted: a test
+            // key read from the environment with a line feed after it is still a test key.
             preg_match('/^test_[A-Za-z\d]{30,}$/', $value) === 1 => 'test-mode-keys.mollie',
             ($name === 'mode' || $name === 'environment') && strtolower(trim($value)) === 'sandbox' => 'test-mode-keys.sandbox',
             default => null,

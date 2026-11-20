@@ -12,6 +12,7 @@ use Pushery\ProductionPreflight\Scope;
 
 /**
  * A session driver that keeps a session for one request: every user is signed out after each page.
+ * Or no session driver at all, where the first request that starts a session raises an error.
  */
 final class SessionDriverCheck extends ProductionCheck
 {
@@ -32,7 +33,13 @@ final class SessionDriverCheck extends ProductionCheck
     {
         $driver = $this->config('session.driver');
 
-        return is_string($driver) && strtolower($driver) === 'array'
+        // `SESSION_DRIVER=null` loads as null and an empty line as '', and Laravel's session manager
+        // resolves neither: the first request that starts a session raises an error.
+        if (! is_string($driver) || trim($driver) === '') {
+            return Inspection::fail($this->message('session-driver.fail'), [new Finding('SESSION_DRIVER', $this->message('session-driver.unconfigured'))]);
+        }
+
+        return strtolower($driver) === 'array'
             ? Inspection::fail($this->message('session-driver.fail'), [new Finding('SESSION_DRIVER', $this->message('session-driver.array'))])
             : Inspection::pass($this->message('session-driver.pass'));
     }

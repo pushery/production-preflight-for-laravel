@@ -6,6 +6,7 @@ namespace Pushery\ProductionPreflight\Checks\Configuration;
 
 use Override;
 use Pushery\ProductionPreflight\Checks\PreflightCheck;
+use Pushery\ProductionPreflight\Evidence;
 use Pushery\ProductionPreflight\Finding;
 use Pushery\ProductionPreflight\Inspection;
 use Pushery\ProductionPreflight\Scope;
@@ -22,7 +23,8 @@ use Pushery\ProductionPreflight\Stage;
  * A machine for development is served under its loopback name, `localhost`, under a name that ends in one of
  * `production-preflight.development_hosts` (`.test`, `.localhost` and `.local` unless set), or at a loopback or a private
  * address. Where `app.url` names any other host, the application runs on a server, and the check fails. An address
- * without a host leaves nothing to judge.
+ * without a host leaves nothing to judge. The host and the value of `APP_ENV` are evidence, which only the console
+ * prints: the summary and the finding name the settings alone.
  */
 final class DevelopmentStageServerCheck extends PreflightCheck
 {
@@ -60,14 +62,15 @@ final class DevelopmentStageServerCheck extends PreflightCheck
         $host = strtolower(trim($host, '[]'));
 
         if ($this->servesDevelopment($host)) {
-            return Inspection::pass($this->message('development-stage-server.pass', ['host' => $host]));
+            return Inspection::pass($this->message('development-stage-server.pass'));
         }
 
         $env = $this->config('app.env');
 
         return Inspection::fail(
-            $this->message('development-stage-server.fail', ['host' => $host, 'env' => is_string($env) ? $env : '']),
-            [new Finding('APP_URL', $this->message('development-stage-server.finding', ['host' => $host]))],
+            $this->message('development-stage-server.fail'),
+            [new Finding('APP_URL', $this->message('development-stage-server.finding'))],
+            [new Evidence('APP_URL', $host), new Evidence('APP_ENV', is_string($env) ? $env : '')],
         );
     }
 
