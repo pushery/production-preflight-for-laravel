@@ -11,6 +11,7 @@ use Pushery\ProductionPreflight\Finding;
 use Pushery\ProductionPreflight\Inspection;
 use Pushery\ProductionPreflight\Scope;
 use Pushery\ProductionPreflight\Stage;
+use Pushery\ProductionPreflight\Support\DevelopmentHosts;
 
 /**
  * A server that declares a development stage: `APP_ENV=local` where the application is served under a public host.
@@ -22,15 +23,12 @@ use Pushery\ProductionPreflight\Stage;
  *
  * A machine for development is served under its loopback name, `localhost`, under a name that ends in one of
  * `production-preflight.development_hosts` (`.test`, `.localhost` and `.local` unless set), or at a loopback or a private
- * address. Where `app.url` names any other host, the application runs on a server, and the check fails. An address
+ * address, the measure of DevelopmentHosts. Where `app.url` names any other host, the application runs on a server, and the check fails. An address
  * without a host leaves nothing to judge. The host and the value of `APP_ENV` are evidence, which only the console
  * prints: the summary and the finding name the settings alone.
  */
 final class DevelopmentStageServerCheck extends PreflightCheck
 {
-    /** The endings of the host names a machine for development is served under, unless the setting names others. */
-    private const array DEVELOPMENT_HOSTS = ['.test', '.localhost', '.local'];
-
     #[Override]
     public function key(): string
     {
@@ -61,7 +59,7 @@ final class DevelopmentStageServerCheck extends PreflightCheck
 
         $host = strtolower(trim($host, '[]'));
 
-        if ($this->servesDevelopment($host)) {
+        if (DevelopmentHosts::serves($host, $this->config('production-preflight.development_hosts'))) {
             return Inspection::pass($this->message('development-stage-server.pass'));
         }
 
@@ -72,40 +70,5 @@ final class DevelopmentStageServerCheck extends PreflightCheck
             [new Finding('APP_URL', $this->message('development-stage-server.finding'))],
             [new Evidence('APP_URL', $host), new Evidence('APP_ENV', is_string($env) ? $env : '')],
         );
-    }
-
-    /** Whether a machine for development is served under this host: its loopback name, an ending of the setting, or a loopback or private address. */
-    private function servesDevelopment(string $host): bool
-    {
-        if ($host === 'localhost') {
-            return true;
-        }
-
-        // A loopback and a private address are both reserved ranges to the filter, so an address it refuses with those
-        // ranges taken out is one of them.
-        if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
-            return filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
-        }
-
-        return array_any($this->developmentHosts(), fn (string $ending): bool => str_ends_with($host, $ending));
-    }
-
-    /**
-     * The endings `production-preflight.development_hosts` names, or the shipped ones where it names none.
-     *
-     * @return list<string>
-     */
-    private function developmentHosts(): array
-    {
-        $configured = $this->config('production-preflight.development_hosts');
-        $endings = [];
-
-        foreach (is_array($configured) ? $configured : self::DEVELOPMENT_HOSTS as $ending) {
-            if (is_string($ending) && trim($ending) !== '') {
-                $endings[] = strtolower(trim($ending));
-            }
-        }
-
-        return $endings;
     }
 }

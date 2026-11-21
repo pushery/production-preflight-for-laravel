@@ -4,6 +4,12 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.7.0] - 2026-11-21
+
+### ✨ Added
+
+- **`DevelopmentHosts::serves()` holds a host to the measure of the `development-stage-server` check.** The check reads `app.url`, which comes from the same `.env` as `APP_ENV`, so a server that kept the whole `.env.example` passes it. An application that answers requests holds the host of a real request to the same measure, `localhost`, the endings of `production-preflight.development_hosts` and loopback or private addresses, instead of rebuilding it: it hands over the value of that setting, `DevelopmentHosts::serves($host, config('production-preflight.development_hosts'))`, and without it the shipped endings count. The checks page names the limit and shows the call.
+
 ## [0.6.1] - 2026-11-20
 
 ### 🐛 Fixed
@@ -91,7 +97,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.4.0...v0.5.0
