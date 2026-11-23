@@ -4,6 +4,17 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.7.1] - 2026-11-23
+
+### 🔧 Changed
+
+- **`symfony/console` is a declared dependency.** `preflight` and `env:lint` escape what they print with its output formatter. Every Laravel version the package supports installs the component already, so no installation resolves differently.
+
+### 🐛 Fixed
+
+- **`preflight` and `env:lint` print every finding, piece of evidence and path as it stands.** Symfony's console formatter reads a part that looks like a style, such as `<comment>` or `</>`, as formatting and drops it, so a value from the `.env` that `--show-values` prints, or a path with such a part, arrived changed. The two commands now pass each of them through `OutputFormatter::escape()`, and the verdict keeps its color.
+- **The finding on carriage returns names two lines in the plural under a regional locale.** Each form of `endings_statement` names its count, `{1} …|[2,*] …`, in all seven catalogs. Laravel picks a form without a count by the name of the locale, from a table that knows `de_AT` but no locale written with a hyphen, so an application on `de-AT` worded two lines as one.
+
 ## [0.7.0] - 2026-11-21
 
 ### ✨ Added
@@ -97,7 +108,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.5.0...v0.6.0

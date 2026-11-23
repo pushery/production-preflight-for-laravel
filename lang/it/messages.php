@@ -84,7 +84,7 @@ return [
         'mark' => 'byte order mark',
         'mark_statement' => 'il file ne inizia con uno, e una shell che carica il file lo considera parte del primo nome',
         'endings' => 'fine riga',
-        'endings_statement' => 'una riga finisce con un ritorno a capo, che una shell conserva alla fine del suo valore|:count righe finiscono con un ritorno a capo, che una shell conserva alla fine di ogni valore',
+        'endings_statement' => '{1} una riga finisce con un ritorno a capo, che una shell conserva alla fine del suo valore|[2,*] :count righe finiscono con un ritorno a capo, che una shell conserva alla fine di ogni valore',
         'whitespace' => 'il valore finisce con spazi, che uno strumento che prende la riga alla lettera conserva, come --env-file di Docker',
     ],
 

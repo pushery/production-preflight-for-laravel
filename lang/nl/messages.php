@@ -84,7 +84,7 @@ return [
         'mark' => 'byte order mark',
         'mark_statement' => 'het bestand begint ermee, en een shell die het bestand inleest houdt hem voor een deel van de eerste naam',
         'endings' => 'regeleinden',
-        'endings_statement' => 'één regel eindigt op een carriage return, die een shell aan het einde van de waarde behoudt|:count regels eindigen op een carriage return, die een shell aan het einde van elke waarde behoudt',
+        'endings_statement' => '{1} één regel eindigt op een carriage return, die een shell aan het einde van de waarde behoudt|[2,*] :count regels eindigen op een carriage return, die een shell aan het einde van elke waarde behoudt',
         'whitespace' => 'de waarde eindigt op witruimte, die een tool behoudt die de regel letterlijk neemt, zoals --env-file van Docker',
     ],
 

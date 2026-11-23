@@ -84,7 +84,7 @@ return [
         'mark' => 'Byte-Order-Mark',
         'mark_statement' => 'die Datei beginnt mit einer, und eine Shell, die die Datei einliest, hält sie für einen Teil des ersten Namens',
         'endings' => 'Zeilenenden',
-        'endings_statement' => 'eine Zeile endet mit einem Wagenrücklauf, den eine Shell am Ende ihres Werts behält|:count Zeilen enden mit einem Wagenrücklauf, den eine Shell am Ende jedes Werts behält',
+        'endings_statement' => '{1} eine Zeile endet mit einem Wagenrücklauf, den eine Shell am Ende ihres Werts behält|[2,*] :count Zeilen enden mit einem Wagenrücklauf, den eine Shell am Ende jedes Werts behält',
         'whitespace' => 'der Wert endet mit Leerraum, den ein Werkzeug behält, das die Zeile wörtlich nimmt, etwa Dockers --env-file',
     ],
 

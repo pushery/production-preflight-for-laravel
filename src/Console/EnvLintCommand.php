@@ -9,6 +9,7 @@ use Illuminate\Contracts\Config\Repository;
 use Pushery\ProductionPreflight\Env\EnvFile;
 use Pushery\ProductionPreflight\Preflight;
 use Pushery\ProductionPreflight\Scope;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 
 /**
  * Lint a `.env` file as text, with every check of the file scope.
@@ -52,8 +53,8 @@ final class EnvLintCommand extends Command
         $path = is_string($configured) && $configured !== '' ? $configured : $this->laravel->basePath('.env');
 
         if (! EnvFile::read($path) instanceof EnvFile) {
-            $this->error($this->text('command.unreadable', ['path' => $path]));
-            $this->line($this->text('command.unreadable_note'));
+            $this->error(OutputFormatter::escape($this->text('command.unreadable', ['path' => $path])));
+            $this->line(OutputFormatter::escape($this->text('command.unreadable_note')));
             $this->announce('env:lint', [], 2);
 
             return 2;
@@ -63,7 +64,7 @@ final class EnvLintCommand extends Command
         $exitCode = $this->exitCode($done, true);
 
         if ($exitCode !== 0 || $this->option('quiet-when-clean') !== true) {
-            $this->line($this->text('command.file', ['path' => $path]));
+            $this->line(OutputFormatter::escape($this->text('command.file', ['path' => $path])));
 
             foreach ($done as $entry) {
                 $this->report($entry['check'], $entry['inspection'], $this->option('show-values') === true);
