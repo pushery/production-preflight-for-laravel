@@ -9,6 +9,7 @@ use Illuminate\Support\InteractsWithTime;
 use Pushery\ProductionPreflight\DeployRecord;
 use Pushery\ProductionPreflight\Preflight;
 use Pushery\ProductionPreflight\Scope;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 
 /**
  * Run the checks of this package and report them, for a deploy or for a person.
@@ -47,7 +48,7 @@ final class PreflightCommand extends Command
 
         // A deploy keeps its output, so the values would outlive the run in the deploy log.
         if ($deploy && $values) {
-            $this->error($this->text('command.values_in_deploy'));
+            $this->error(OutputFormatter::escape($this->text('command.values_in_deploy')));
 
             return 2;
         }
@@ -59,7 +60,7 @@ final class PreflightCommand extends Command
         // deploy the release before it keeps serving, its workers with it. A record of it would make
         // the queue-restart check report those workers as running old code until a deploy passed.
         if ($deploy && $exitCode === 0 && ! DeployRecord::write($this->laravel, $this->currentTime())) {
-            $this->warn($this->text('command.unrecorded', ['path' => DeployRecord::path($this->laravel)]));
+            $this->warn(OutputFormatter::escape($this->text('command.unrecorded', ['path' => DeployRecord::path($this->laravel)])));
         }
 
         foreach ($done as $entry) {
@@ -67,7 +68,7 @@ final class PreflightCommand extends Command
         }
 
         $this->newLine();
-        $this->line($this->text('command.exit.'.$exitCode));
+        $this->line(OutputFormatter::escape($this->text('command.exit.'.$exitCode)));
         $this->announce('preflight', $done, $exitCode);
 
         return $exitCode;

@@ -84,7 +84,7 @@ return [
         'mark' => 'marca de orden de bytes',
         'mark_statement' => 'el archivo empieza con una, y una shell que carga el archivo la toma como parte del primer nombre',
         'endings' => 'finales de línea',
-        'endings_statement' => 'una línea termina en un retorno de carro, que una shell conserva al final de su valor|:count líneas terminan en un retorno de carro, que una shell conserva al final de cada valor',
+        'endings_statement' => '{1} una línea termina en un retorno de carro, que una shell conserva al final de su valor|[2,*] :count líneas terminan en un retorno de carro, que una shell conserva al final de cada valor',
         'whitespace' => 'el valor termina en espacios, que conserva una herramienta que toma la línea al pie de la letra, como --env-file de Docker',
     ],
 

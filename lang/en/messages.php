@@ -84,7 +84,7 @@ return [
         'mark' => 'byte order mark',
         'mark_statement' => 'the file starts with one, and a shell that sources the file reads it as part of the first name',
         'endings' => 'line endings',
-        'endings_statement' => 'one line ends in a carriage return, which a shell keeps at the end of its value|:count lines end in a carriage return, which a shell keeps at the end of each value',
+        'endings_statement' => '{1} one line ends in a carriage return, which a shell keeps at the end of its value|[2,*] :count lines end in a carriage return, which a shell keeps at the end of each value',
         'whitespace' => 'the value ends in whitespace, which a tool that takes the line literally, such as Docker\'s --env-file, keeps',
     ],
 

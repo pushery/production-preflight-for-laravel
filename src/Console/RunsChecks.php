@@ -10,6 +10,7 @@ use Pushery\ProductionPreflight\Checks\PreflightCheck;
 use Pushery\ProductionPreflight\Events\PreflightCompleted;
 use Pushery\ProductionPreflight\Inspection;
 use Pushery\ProductionPreflight\Verdict;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 use Throwable;
 
 /**
@@ -61,15 +62,15 @@ trait RunsChecks
             Verdict::Undetermined => 'question',
         };
 
-        $this->line(sprintf('<%s>[%s]</%s> %s: %s', $style, $this->text('verdict.'.$inspection->verdict->value), $style, $check->getLabel(), $inspection->summary));
+        $this->line(sprintf('<%s>[%s]</%s> %s: %s', $style, OutputFormatter::escape($this->text('verdict.'.$inspection->verdict->value)), $style, OutputFormatter::escape($check->getLabel()), OutputFormatter::escape($inspection->summary)));
 
         foreach ($inspection->findings as $finding) {
-            $this->line('  - '.$finding->describe());
+            $this->line('  - '.OutputFormatter::escape($finding->describe()));
         }
 
         if ($values) {
             foreach ($inspection->evidence as $evidence) {
-                $this->line('    '.$this->text('command.evidence', ['evidence' => $evidence->describe()]));
+                $this->line('    '.OutputFormatter::escape($this->text('command.evidence', ['evidence' => $evidence->describe()])));
             }
         }
     }

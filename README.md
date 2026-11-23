@@ -92,6 +92,15 @@ This writes `config/production-preflight.php`, where every option is documented 
 ],
 ```
 
+To change the package's translations, publish them and edit the copies:
+
+```bash
+php artisan vendor:publish --tag=production-preflight-lang
+```
+
+The translations land in `lang/vendor/production-preflight`, where Laravel reads them before the
+package's own. `--tag=production-preflight` publishes the configuration and the translations at once.
+
 ## Testing
 
 The test suite is not part of the published package: the tests and their PHPUnit
@@ -103,13 +112,13 @@ configuration stay in the development repository, so a clone of this repository 
 Please review the [security policy](SECURITY.md) and report vulnerabilities
 privately rather than opening a public issue.
 
-## Built by Pushery
+## Built by PUSHERY
 
-This package is built and maintained by [Pushery](https://www.pushery.com) — a
+This package is built and maintained by [PUSHERY](https://www.pushery.com) — a
 Berlin-based studio building Laravel applications, SaaS products, and open-source
 tools.
 
-Building a Laravel UI? [WireKit](https://www.wirekit.app) is Pushery's open-source
+Building a Laravel UI? [WireKit](https://www.wirekit.app) is PUSHERY's open-source
 Livewire component kit.
 Browse the rest of our work at [pushery.com](https://www.pushery.com).
 

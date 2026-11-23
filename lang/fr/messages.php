@@ -84,7 +84,7 @@ return [
         'mark' => 'marque d’ordre des octets',
         'mark_statement' => 'le fichier commence par une, et un shell qui charge le fichier la prend pour une partie du premier nom',
         'endings' => 'fins de ligne',
-        'endings_statement' => 'une ligne se termine par un retour chariot, qu’un shell conserve à la fin de sa valeur|:count lignes se terminent par un retour chariot, qu’un shell conserve à la fin de chaque valeur',
+        'endings_statement' => '{1} une ligne se termine par un retour chariot, qu’un shell conserve à la fin de sa valeur|[2,*] :count lignes se terminent par un retour chariot, qu’un shell conserve à la fin de chaque valeur',
         'whitespace' => 'la valeur se termine par des espaces, qu’un outil qui prend la ligne à la lettre conserve, comme --env-file de Docker',
     ],
 
