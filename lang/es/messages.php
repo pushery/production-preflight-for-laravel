@@ -231,6 +231,7 @@ return [
         'stale' => 'la última señal de reinicio es anterior al último despliegue. Ejecuta php artisan reload, o php artisan queue:restart, al final del script de despliegue, después de php artisan preflight --deploy.',
         'no_worker' => 'La conexión de cola predeterminada no tiene ningún worker que reiniciar.',
         'no_deploy' => 'Sin comprobar: no hay ningún despliegue registrado. Añade php artisan preflight --deploy al script de despliegue, antes de php artisan reload o php artisan queue:restart.',
+        'within_grace' => 'El último despliegue se registró hace menos de :minutes minutos. Un despliegue tiene ese tiempo para reiniciar los workers de la cola al final.',
     ],
 
     'pending-migrations' => [

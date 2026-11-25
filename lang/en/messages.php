@@ -231,6 +231,7 @@ return [
         'stale' => 'the last restart signal is older than the last deploy. Run php artisan reload, or php artisan queue:restart, at the end of the deploy script, after php artisan preflight --deploy.',
         'no_worker' => 'The default queue connection runs no worker to restart.',
         'no_deploy' => 'Not checked: no deploy is on record. Add php artisan preflight --deploy to the deploy script, ahead of php artisan reload or php artisan queue:restart.',
+        'within_grace' => 'The last deploy was recorded less than :minutes minutes ago, and a deploy is given that long to restart the queue workers at its end.',
     ],
 
     'pending-migrations' => [

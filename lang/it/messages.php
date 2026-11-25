@@ -231,6 +231,7 @@ return [
         'stale' => 'l’ultimo segnale di riavvio è più vecchio dell’ultimo deploy. Esegui php artisan reload, o php artisan queue:restart, alla fine dello script di deploy, dopo php artisan preflight --deploy.',
         'no_worker' => 'La connessione della coda predefinita non ha worker da riavviare.',
         'no_deploy' => 'Non verificato: nessun deploy è registrato. Aggiungi php artisan preflight --deploy allo script di deploy, prima di php artisan reload o php artisan queue:restart.',
+        'within_grace' => "L'ultimo deploy è stato registrato meno di :minutes minuti fa. Un deploy ha questo tempo per riavviare i worker della coda alla sua fine.",
     ],
 
     'pending-migrations' => [

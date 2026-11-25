@@ -4,6 +4,16 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.7.2] - 2026-11-25
+
+### 🐛 Fixed
+
+- **`queue-restart` no longer fails while a deploy runs.** `preflight --deploy` records the deploy before the releases switch, and the release still live read the record from the shared `storage` until the deploy script restarted the workers at its end. Its health check reported workers older than the deploy in that gap, and laravel-health mailed the operator on every deploy that did everything right. The check now passes for 15 minutes after a deploy was recorded, `queue_restart.grace_minutes` or `PRODUCTION_PREFLIGHT_QUEUE_RESTART_GRACE`, as `config-cache-fresh` does for a changed `.env`, and reports only after that. 0 reports at once.
+
+### 📚 Documentation
+
+- **The requirements name the versions the package is tested on.** PHP 8.4.27, 8.5.x and 8.6.x, PostgreSQL 18.7 and MySQL 8.4.13, as the lanes run them, in the README and on the start page of the documentation.
+
 ## [0.7.1] - 2026-11-23
 
 ### 🔧 Changed
@@ -108,7 +118,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.0...v0.6.1

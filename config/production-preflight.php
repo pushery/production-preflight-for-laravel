@@ -127,4 +127,17 @@ return [
             : 15,
     ],
 
+    /*
+    | The queue-restart check reports workers older than the last deploy only once the deploy has been
+    | on record for this many minutes. preflight --deploy records the deploy before the releases
+    | switch, and the release still live reads the record until the deploy script restarts the workers
+    | at its end. The value is held to at least 0, where 0 reports at once, and a value that is no such
+    | number keeps the 15 shipped here.
+    */
+    'queue_restart' => [
+        'grace_minutes' => is_numeric($restartGrace = env('PRODUCTION_PREFLIGHT_QUEUE_RESTART_GRACE')) && (int) $restartGrace >= 0
+            ? (int) $restartGrace
+            : 15,
+    ],
+
 ];

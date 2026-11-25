@@ -231,6 +231,7 @@ return [
         'stale' => 'le dernier signal de redémarrage est antérieur au dernier déploiement. Exécutez php artisan reload, ou php artisan queue:restart, à la fin du script de déploiement, après php artisan preflight --deploy.',
         'no_worker' => 'La connexion de file par défaut n’a aucun worker à redémarrer.',
         'no_deploy' => 'Non vérifié : aucun déploiement n’est enregistré. Ajoutez php artisan preflight --deploy au script de déploiement, avant php artisan reload ou php artisan queue:restart.',
+        'within_grace' => 'Le dernier déploiement a été enregistré il y a moins de :minutes minutes. Un déploiement dispose de ce délai pour redémarrer les workers de la file à sa fin.',
     ],
 
     'pending-migrations' => [
