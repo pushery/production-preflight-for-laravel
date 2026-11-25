@@ -231,6 +231,7 @@ return [
         'stale' => 'o último sinal de reinício é mais antigo do que o último deploy. Acrescente php artisan reload, ou php artisan queue:restart, ao fim do script de deploy, depois de php artisan preflight --deploy.',
         'no_worker' => 'A ligação de fila predefinida não tem nenhum worker para reiniciar.',
         'no_deploy' => 'Não verificado: nenhum deploy está registado. Acrescente php artisan preflight --deploy ao script de deploy, antes de php artisan reload ou php artisan queue:restart.',
+        'within_grace' => 'O último deploy foi registado há menos de :minutes minutos. Um deploy tem esse tempo para reiniciar os workers da fila no fim.',
     ],
 
     'pending-migrations' => [

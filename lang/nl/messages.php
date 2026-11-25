@@ -231,6 +231,7 @@ return [
         'stale' => 'het laatste herstartsignaal is ouder dan de laatste deploy. Zet php artisan reload of php artisan queue:restart aan het einde van het deployscript, na php artisan preflight --deploy.',
         'no_worker' => 'De standaard-queueverbinding heeft geen worker om te herstarten.',
         'no_deploy' => 'Niet gecontroleerd: er is geen deploy vastgelegd. Zet php artisan preflight --deploy in het deployscript, vóór php artisan reload of php artisan queue:restart.',
+        'within_grace' => 'De laatste deploy is minder dan :minutes minuten geleden vastgelegd. Een deploy krijgt zo lang de tijd om de queue-workers aan het einde opnieuw te starten.',
     ],
 
     'pending-migrations' => [

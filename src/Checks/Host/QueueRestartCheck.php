@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pushery\ProductionPreflight\Checks\Host;
 
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Support\Facades\Date;
 use Override;
 use Pushery\ProductionPreflight\Checks\ProductionCheck;
 use Pushery\ProductionPreflight\DeployRecord;
@@ -40,6 +41,11 @@ final class QueueRestartCheck extends ProductionCheck
     public const string SIGNAL = 'illuminate:queue:restart';
 
     /**
+     * The minutes a deploy is given to restart the workers at its end, where the configuration names none.
+     */
+    public const int GRACE_MINUTES = 15;
+
+    /**
      * Until `preflight --deploy` recorded a deploy there is no moment to hold the restart signal against.
      */
     #[Override]
@@ -73,6 +79,15 @@ final class QueueRestartCheck extends ProductionCheck
             return Inspection::undetermined($this->message('queue-restart.no_deploy'));
         }
 
+        // preflight --deploy records the deploy before the releases switch, and the release still live reads the record
+        // until the deploy script restarts the workers at its end. A record younger than the grace is a deploy that runs.
+        // A record ahead of the clock has run for no time at all, so a grace of 0 reports it at once like any other.
+        $grace = $this->graceMinutes();
+
+        if (max(0, Date::now()->getTimestamp() - $deployed) < $grace * 60) {
+            return Inspection::pass($this->message('queue-restart.within_grace', ['minutes' => $grace]));
+        }
+
         $signal = $this->app->make(Repository::class)->get(self::SIGNAL);
 
         if (! is_numeric($signal)) {
@@ -82,5 +97,15 @@ final class QueueRestartCheck extends ProductionCheck
         return (int) $signal < $deployed
             ? Inspection::fail($this->message('queue-restart.fail'), [new Finding('queue:restart', $this->message('queue-restart.stale'))])
             : Inspection::pass($this->message('queue-restart.pass'));
+    }
+
+    /**
+     * The minutes from `production-preflight.queue_restart.grace_minutes`, or the shipped 15.
+     */
+    private function graceMinutes(): int
+    {
+        $minutes = $this->config('production-preflight.queue_restart.grace_minutes');
+
+        return is_numeric($minutes) && (int) $minutes >= 0 ? (int) $minutes : self::GRACE_MINUTES;
     }
 }
