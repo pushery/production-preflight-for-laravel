@@ -82,7 +82,7 @@ final class PlaceholderValuesCheck extends PreflightCheck
             $reason = match (true) {
                 $value === '' => null,
                 $this->isPlaceholder($value) => 'placeholder-values.placeholder',
-                $example instanceof EnvFile && preg_match($secretKeys, $key) === 1 && ! $this->isLiteral($value) && ! $this->isReference($value) && $example->last($key)?->value() === $value => 'placeholder-values.from_example',
+                $example instanceof EnvFile && preg_match($secretKeys, $key) === 1 && ! $this->countsPerCredential($key) && ! $this->isLiteral($value) && ! $this->isReference($value) && $example->last($key)?->value() === $value => 'placeholder-values.from_example',
                 default => null,
             };
 
@@ -152,6 +152,17 @@ final class PlaceholderValuesCheck extends PreflightCheck
         }
 
         return $compiles ? $pattern : self::SECRET_KEYS;
+    }
+
+    /**
+     * Whether a key's name says it counts something per token or per key, such as
+     * `SANCTUM_HARDENING_PER_TOKEN`: a limit, not a credential, whatever `secret_keys` matches. Read
+     * here rather than in the pattern, so a published copy of the configuration keeps its own
+     * pattern and still reads such a limit as one.
+     */
+    private function countsPerCredential(string $key): bool
+    {
+        return preg_match('/(?:^|_)PER_(?:TOKEN|KEY)$/iD', $key) === 1;
     }
 
     /**
