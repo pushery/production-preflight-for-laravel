@@ -4,6 +4,18 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.8.0] - 2026-11-26
+
+### 🔧 Changed
+
+- **`PRODUCTION_PREFLIGHT_HTTP_PROBE` set to a spelling that says neither on nor off stops the boot.** A value such as `ture` kept the probe off. The boot and `config:cache` now stop with an `InvalidArgumentException` that names the variable, the value as written and every spelling for on and off. A missing or empty line and `empty`, `(empty)`, `null` and `(null)` keep it off, as before.
+
+  **Upgrade:** a host whose `.env` gives the variable another spelling corrects it, or deletes the line to keep the probe off.
+
+### 🐛 Fixed
+
+- **A limit per token or per key is no credential to `placeholder-values`.** `SANCTUM_HARDENING_PER_TOKEN=300` with the value of the committed example file failed the check, because the name ends in `TOKEN`, so `preflight --deploy` held back a deploy that kept the shipped limit. A key whose name ends in `PER_TOKEN` or `PER_KEY` now counts as a limit, whatever `production-preflight.placeholders.secret_keys` matches, and that holds for a published configuration as well. A token with the value of the example file still fails.
+
 ## [0.7.2] - 2026-11-25
 
 ### 🐛 Fixed
@@ -118,7 +130,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.6.1...v0.7.0

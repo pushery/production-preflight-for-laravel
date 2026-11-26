@@ -74,8 +74,10 @@ return [
     | case, and an entry that ends in `*` matches every value it begins. `required` names the keys
     | that must be set and not empty. A key whose name matches `secret_keys` also fails when its
     | value is the one the committed example file carries, unless the value only refers to other
-    | keys. A `VITE_` key is left out of `secret_keys`: Vite compiles it into the page. A
-    | `secret_keys` that is no pattern PHP compiles keeps the shipped one.
+    | keys. A `VITE_` key is left out of `secret_keys`: Vite compiles it into the page. A key
+    | whose name ends in `PER_TOKEN` or `PER_KEY` counts something per credential and is no
+    | credential itself, whatever `secret_keys` matches. A `secret_keys` that is no pattern PHP
+    | compiles keeps the shipped one.
     */
     'placeholders' => [
         'values' => [
@@ -91,11 +93,13 @@ return [
     | switched on: a health check that requests its own site on every run is a decision to make. Off,
     | the check says it did not look.
     |
-    | The switch is read typed: only `true`, `1`, `yes` and `on` switch it on. The timeout in seconds
-    | is held to at least 1, and a value that is no such number keeps the 5 shipped here.
+    | The switch is read typed: `true`, `1`, `yes` and `on` switch it on, `false`, `0`, `no` and
+    | `off` switch it off, and a missing or empty line keeps it off. Any other spelling stops the
+    | boot with an error that names the variable. The timeout in seconds is held to at least 1, and
+    | a value that is no such number keeps the 5 shipped here.
     */
     'http_probe' => [
-        'enabled' => EnvSwitch::read(env('PRODUCTION_PREFLIGHT_HTTP_PROBE'), false),
+        'enabled' => EnvSwitch::read(env('PRODUCTION_PREFLIGHT_HTTP_PROBE'), false, 'PRODUCTION_PREFLIGHT_HTTP_PROBE'),
         'timeout' => is_numeric($probeTimeout = env('PRODUCTION_PREFLIGHT_HTTP_PROBE_TIMEOUT')) && (int) $probeTimeout >= 1
             ? (int) $probeTimeout
             : 5,
