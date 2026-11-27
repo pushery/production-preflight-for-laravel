@@ -9,6 +9,7 @@ use Illuminate\Support\InteractsWithTime;
 use Pushery\ProductionPreflight\DeployRecord;
 use Pushery\ProductionPreflight\Preflight;
 use Pushery\ProductionPreflight\Scope;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 
 /**
@@ -24,6 +25,7 @@ use Symfony\Component\Console\Formatter\OutputFormatter;
  * Without `--deploy` it runs every check, the state of the installation included, which a person on
  * the server wants to see at once and the scheduler reaches through laravel-health.
  */
+#[AsCommand(name: 'preflight')]
 final class PreflightCommand extends Command
 {
     use InteractsWithTime;

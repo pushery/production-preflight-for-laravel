@@ -21,9 +21,10 @@ use Pushery\ProductionPreflight\Scope;
  * `php artisan reload`. A deploy that forgets both leaves the workers on the old code for as long as
  * they live, and nothing shows it: they process jobs, just with yesterday's classes.
  *
- * The check holds that time against the time `preflight --deploy` recorded. So the deploy script runs
- * `preflight --deploy` before `php artisan reload`, or `queue:restart`; without a recorded deploy the
- * check cannot tell and says so. A queue that runs on `sync`, `deferred`, `background` or `null` has
+ * The check holds that time against the time `preflight --deploy` recorded for the release the check
+ * runs in, so a deploy that fails after its preflight leaves the live release with the verdict it had.
+ * So the deploy script runs `preflight --deploy` before `php artisan reload`, or `queue:restart`;
+ * without a recorded deploy the check cannot tell and says so. A queue that runs on `sync`, `deferred`, `background` or `null` has
  * no worker to restart, and neither has a `failover` connection made only of such connections.
  *
  * A signal older than the deploy means the workers run the old code. A missing one has two causes
@@ -79,9 +80,10 @@ final class QueueRestartCheck extends ProductionCheck
             return Inspection::undetermined($this->message('queue-restart.no_deploy'));
         }
 
-        // preflight --deploy records the deploy before the releases switch, and the release still live reads the record
-        // until the deploy script restarts the workers at its end. A record younger than the grace is a deploy that runs.
-        // A record ahead of the clock has run for no time at all, so a grace of 0 reports it at once like any other.
+        // preflight --deploy records the deploy of the release it runs in before the releases switch, and that release
+        // reads its record from the moment it goes live, while the deploy script restarts the workers only at its end. A
+        // record younger than the grace is a deploy that runs. A record ahead of the clock has run for no time at all, so a
+        // grace of 0 reports it at once like any other.
         $grace = $this->graceMinutes();
 
         if (max(0, Date::now()->getTimestamp() - $deployed) < $grace * 60) {

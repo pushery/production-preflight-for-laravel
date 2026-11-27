@@ -4,6 +4,20 @@ All notable changes to `pushery/production-preflight-for-laravel` are documented
 
 A release carries only the sections that have an entry, in this order: `### ⚠️ Breaking`, `### ✨ Added`, `### 🔧 Changed`, `### ⚡ Performance`, `### 🐛 Fixed`, `### 🔒 Security`, `### 🧹 Deprecated`, `### 🗑️ Removed` and `### 📚 Documentation`.
 
+## [0.8.1] - 2026-11-27
+
+### ⚡ Performance
+
+- **A start of the console builds none of the package's commands.** `env:lint` and `preflight` carry `#[AsCommand]` with the name of their signature, so Laravel keeps each in the map of its loader and builds it only when it runs. Before, every start of a host's console built both through the container, for each run of the schedule, each queue worker and each `artisan` call, whatever ran.
+
+### 🐛 Fixed
+
+- **`queue-restart` keeps its verdict after a deploy that fails after `preflight --deploy`.** The record of the last deploy held one time for every release, so a deploy that passed its preflight and stopped later, at a migration or at the switch, made the live release report its workers as running the code from before it, until a deploy came through. Each release now keeps its own line, under the real path of its directory, and the check reads the line of the release it runs in. A record of a single time, from before, still counts for every release, and the line of a release no longer on the disk goes when the next deploy is recorded.
+
+### 📚 Documentation
+
+- **The checks page names what neither check sees: a `config:cache` outside a deploy.** After a change of `.env` the workers keep the configuration they started with until they restart, while `config-cache-fresh` and `queue-restart` both pass. `queue:restart` belongs after such a `config:cache` as well.
+
 ## [0.8.0] - 2026-11-26
 
 ### 🔧 Changed
@@ -130,7 +144,8 @@ A release carries only the sections that have an entry, in this order: `### ⚠�
 
 Initial release. The package stops a Laravel deploy on a production misconfiguration and keeps checking once the application runs. `php artisan preflight --deploy` runs the checks a deploy can answer, `php artisan env:lint` lints a `.env` file as text, and twenty-seven checks run as laravel-health checks over the `.env` file, the configuration and the installation. No finding carries a value of the application.
 
-[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/pushery/production-preflight-for-laravel/compare/v0.7.0...v0.7.1
