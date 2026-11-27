@@ -9,6 +9,7 @@ use Illuminate\Contracts\Config\Repository;
 use Pushery\ProductionPreflight\Env\EnvFile;
 use Pushery\ProductionPreflight\Preflight;
 use Pushery\ProductionPreflight\Scope;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 
 /**
@@ -24,6 +25,7 @@ use Symfony\Component\Console\Formatter\OutputFormatter;
  * this command into a deploy relies on a green exit meaning something, and "nothing found" and "not
  * looked" must not read alike.
  */
+#[AsCommand(name: 'env:lint')]
 final class EnvLintCommand extends Command
 {
     use RunsChecks;
